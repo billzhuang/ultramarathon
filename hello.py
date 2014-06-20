@@ -1,17 +1,17 @@
 from flask import Flask, url_for, request, session, redirect
-from moves import MovesClient
+from bong import BongClient
 from datetime import datetime, timedelta
 import _keys
 
 app = Flask(__name__)
 
-Moves = MovesClient(_keys.client_id, _keys.client_secret)
+bong = BongClient(_keys.client_id, _keys.client_secret)
 
 @app.route("/")
 def index():
     if 'token' not in session:
         oauth_return_url = url_for('oauth_return', _external=True)
-        auth_url = Moves.build_oauth_url(oauth_return_url)
+        auth_url = bong.build_oauth_url(oauth_return_url)
         return 'Authorize this application: <a href="%s">%s</a>' % \
             (auth_url, auth_url)
     return redirect(url_for('show_info'))
@@ -24,8 +24,9 @@ def oauth_return():
         return error
     oauth_return_url = url_for('oauth_return', _external=True)
     code = request.args.get("code")
-    token = Moves.get_oauth_token(code, redirect_uri=oauth_return_url)
-    session['token'] = token
+    token = bong.get_oauth_token(code, redirect_uri=oauth_return_url)
+    session['token'] = token.access_token
+    session['uid'] = token.uid
     return redirect(url_for('show_info'))
 
 
@@ -33,14 +34,15 @@ def oauth_return():
 def logout():
     if 'token' in session:
         del(session['token'])
+        del(session['uid'])
     return redirect(url_for('index'))
 
 
 @app.route("/info")
 def show_info():
-    profile = Moves.user_profile(access_token=session['token'])
-    response = 'User ID: %s<br />First day using Moves: %s' % \
-        (profile['userId'], profile['profile']['firstDate'])
+    profile = bong.get('/1/userInfo/%s' % session['uid'], access_token=session['token'])
+    response = 'User ID: %s<br />First day using bong: %s' % \
+        (profile['value']['name'], profile['value']['birthday'])
     return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
         "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
 
@@ -48,7 +50,7 @@ def show_info():
 @app.route("/today")
 def today():
     today = datetime.now().strftime('%Y%m%d')
-    info = Moves.user_summary_daily(today, access_token=session['token'])
+    info = bong.user_summary_daily(today, access_token=session['token'])
     res = ''
     for activity in info[0]['summary']:
         if activity['activity'] == 'wlk':
@@ -63,7 +65,7 @@ def today():
 @app.route("/expanded-summary")
 def expanded_summary():
     today = datetime.now().strftime('%Y%m%d')
-    info = Moves.user_summary_daily(today, access_token=session['token'])
+    info = bong.user_summary_daily(today, access_token=session['token'])
     res = ''
     for activity in info[0]['summary']:
         res = activities_block(activity, res)
@@ -88,7 +90,7 @@ def expanded_summary():
 @app.route("/activities")
 def activities():
     today = datetime.now().strftime('%Y%m%d')
-    info = Moves.user_activities_daily(today, access_token=session['token'])
+    info = bong.user_activities_daily(today, access_token=session['token'])
     res = ''
     for segment in info[0]['segments']:
         if segment['type'] == 'move':
@@ -115,7 +117,7 @@ def activities():
 @app.route("/places")
 def places():
     today = datetime.now().strftime('%Y%m%d')
-    info = Moves.user_places_daily(today, access_token=session['token'])
+    info = bong.user_places_daily(today, access_token=session['token'])
     res = ''
     for segment in info[0]['segments']:
         res = place(segment, res)
@@ -125,7 +127,7 @@ def places():
 @app.route("/storyline")
 def storyline():
     today = datetime.now().strftime('%Y%m%d')
-    info = Moves.user_storyline_daily(today, trackPoints={'true'}, access_token=session['token'])
+    info = bong.user_storyline_daily(today, trackPoints={'true'}, access_token=session['token'])
     res = ''
     for segment in info[0]['segments']:
         if segment['type'] == 'place':

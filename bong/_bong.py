@@ -12,12 +12,22 @@ class BongAPINotModifed(Exception):
     """Raised if the document requested is unmodified. Need the use of etag header"""
     pass
 
+class BongToken(object):
+    def __init__(uid, access_token, access_token_expires_in, 
+                refresh_token, refresh_token_expiration):
+        self.uid = uid
+        self.access_token = access_token
+        self.access_token_expires_in = access_token_expires_in
+        self.refresh_token = refresh_token
+        self.refresh_token_expiration = refresh_token_expiration
+
 class BongClient(object):
     """OAuth client for the Bong API"""
     api_url = "http://open-test.bong.cn"
     #app_auth_url = "bong://app/authorize"
     web_auth_uri = "http://open-test.bong.cn/oauth/authorize"
     token_url = "http://open-test.bong.cn/oauth/token"
+    refresh_url = token_url
     #tokeninfo_url = "http://open-test.bong.cn/oauth/tokeninfo"
     
     
@@ -67,7 +77,32 @@ class BongClient(object):
         response = requests.post(self.token_url, params=params)
         response = json.loads(response.content)
         try:
-            return response['access_token']
+            return BongToken(response['uid'],
+                            response['access_token'],
+                            response['expires_in'],
+                            response['refresh_token'],
+                            response['refresh_token_expiration'])
+        except:
+            error = "<%(error)s>: %(error_description)s" % response
+            raise BongAPIError(error)
+
+    def refresh_token(self, refresh_token, **kwargs):
+
+        params = {
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'grant_type': kwargs.get('grant_type', 'refresh_token'),
+            'refresh_token': refresh_token
+        }
+
+        response = requests.post(self.refresh_url, params=params)
+        response = json.loads(response.content)
+        try:
+            return BongToken(response['uid'],
+                            response['access_token'],
+                            response['expires_in'],
+                            response['refresh_token'],
+                            response['refresh_token_expiration'])
         except:
             error = "<%(error)s>: %(error_description)s" % response
             raise BongAPIError(error)
@@ -96,24 +131,12 @@ class BongClient(object):
             raise BongAPIError("You must provide a valid access token.")
 
         url = "%s/%s" % (self.api_url, path)
-        if 'access_token' in params:
-            access_token = params['access_token']
-            del(params['access_token'])
-        else:
-            access_token = self.access_token
+        if 'access_token' not in params:
+            params['access_token'] = self.access_token
 
-        '''headers = {
-            "Authorization": 'Bearer ' + access_token
-        }
-
-        if 'etag' in params:
-            headers['If-None-Match'] = params['etag']
-            del(params['etag'])'''
-        
         resp = requests.request(method, url,
                                 data=data,
-                                params=params,
-                                headers=headers)
+                                params=params)
         if str(resp.status_code)[0] not in ('2', '3'):
             raise BongAPIError("Error returned via the API with status code (%s):" %
                                 resp.status_code, resp.text)
