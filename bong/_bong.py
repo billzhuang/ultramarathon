@@ -25,11 +25,10 @@ class BongToken(object):
         self.refresh_token_expiration = refresh_token_expiration
 
 class BongUser(object):
-    def __init__(self, name=None, gender=None, birthday=None, avator=None):
+    def __init__(self, name=None, gender=None, birthday=None, avatar=None):
         self.name = name
         self.gender = gender
         self.birthday = birthday
-        self.avator = avator
 
 class BongClient(object):
     """OAuth client for the Bong API"""
@@ -186,12 +185,17 @@ class BongClient(object):
             raise BongAPIError('failed to get user info, cuz lack of token and uid')
 
         profile = self.get('/1/userInfo/%s' % params['uid'], access_token=params['access_token'])
-        img = self.get('/1/userInfo/avatar/%s' % params['uid'], access_token=params['token'])
 
         return BongUser(profile['value']['name'],
                         profile['value']['gender'],
-                        profile['value']['birthday'],
-                        img['value'])
+                        profile['value']['birthday'])
+    def user_avator(self, **params):
+        if 'access_token' not in params or 'uid' not in params:
+            raise BongAPIError('failed to get user avator, cuz lack of token and uid')
+
+        img = self.get('/1/userInfo/avatar/%s' % params['uid'], access_token=params['access_token'])
+
+        return img['value']
 
     def __getattr__(self, name):
         '''\

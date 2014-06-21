@@ -13,12 +13,17 @@ class TokenInfo(object):
 
 class UserInfo(object):
 	def __init__(self, exists=None, name=None, gender=None,
-				birthday=None, avator=None,
-				isactive=0, last_request_time=None):
+				birthday=None, isactive=0,
+				 last_request_time=None, uid=None):
 		self.exists = exists
 		self.name = name
 		self.gender = gender
 		self.birthday = birthday
-		self.avator = avator
 		self.isactive = isactive
 		self.last_request_time = last_request_time
+		self.uid = uid
+
+class TeamMember(object):
+	def __init__(self, team_id=None, friend_uid=None):
+		self.team_id = team_id
+		self.friend_uid = friend_uid
