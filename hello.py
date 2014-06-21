@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
 from flask import Flask, url_for, request, session, redirect
 from bong import BongClient
 from datetime import datetime, timedelta
@@ -41,11 +43,21 @@ def logout():
 @app.route("/info")
 def show_info():
     profile = bong.get('/1/userInfo/%s' % session['uid'], access_token=session['token'])
+    img = bong.get('/1/userInfo/avatar/%s' % session['uid'], access_token=session['token'])
     response = 'User ID: %s<br />First day using bong: %s' % \
         (profile['value']['name'], profile['value']['birthday'])
-    return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
+    response += '<img src="data:image/png;base64,%s" alt="%s" />' %\
+        (img['value'], profile['value']['name'])
+    return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('show_dayrun') + \
         "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
 
+@app.route("/dayrun")
+def show_dayrun():
+    today = datetime.now().strftime('%Y%m%d')
+    running_data = bong.bongday_running(today, uid=session['uid'], access_token=session['token'])
+    response = u'Today run: %s 米' % running_data
+    return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
+        "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
 
 @app.route("/today")
 def today():

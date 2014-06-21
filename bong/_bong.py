@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
 import json
 import urllib
 import requests
 import types
+from decimal import Decimal
 
 
 class BongAPIError(Exception):
@@ -13,8 +16,8 @@ class BongAPINotModifed(Exception):
     pass
 
 class BongToken(object):
-    def __init__(uid, access_token, access_token_expires_in, 
-                refresh_token, refresh_token_expiration):
+    def __init__(self, uid=None, access_token=None, access_token_expires_in=None, 
+                refresh_token=None, refresh_token_expiration=None):
         self.uid = uid
         self.access_token = access_token
         self.access_token_expires_in = access_token_expires_in
@@ -59,7 +62,7 @@ class BongClient(object):
         if redirect_uri:
             params['redirect_uri'] = redirect_uri
 
-        # Bong hates +s for spaces, so use %20 instead.
+        # hates +s for spaces, so use %20 instead.
         encoded = urllib.urlencode(params).replace('+', '%20')
         return "%s?%s" % (self.auth_url, encoded)
 
@@ -75,8 +78,9 @@ class BongClient(object):
         if 'redirect_uri' in kwargs:
             params['redirect_uri'] = kwargs['redirect_uri']
         response = requests.post(self.token_url, params=params)
-        response = json.loads(response.content)
+        response = response.json()
         try:
+            #return 'heelo'
             return BongToken(response['uid'],
                             response['access_token'],
                             response['expires_in'],
@@ -158,6 +162,17 @@ class BongClient(object):
         if not self.first_date:
             response = self.user_profile()
             self.first_date = response['profile']['firstDate']
+
+    def bongday_running(self, duedate, **params):
+        detail = self.get('/1/bongday/blocks/%s' % duedate, **params)
+        running_sum = 0.0
+
+        for activity in detail['value']:
+            if activity['type'] == '2' and \
+                activity['subtype'] == '4':
+                running_sum += Decimal(activity['distance'])
+
+        return running_sum
 
     def __getattr__(self, name):
         '''\
