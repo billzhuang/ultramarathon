@@ -37,6 +37,22 @@ class DataLayer(object):
 						row[3],
 						row[4])
 
+	def create_tokon(self, token):
+		c = self.db.cursor()
+		try:
+			c.execute('''insert into bong.token
+					(uid, access_token,expires_in,refresh_token) 
+					values(%s,%s,%s,%s)'''
+					, (token.uid, token.access_token, token.expires_in, token.refresh_token))
+			#self.db.commit()
+		except MySQLdb.Error, e:
+		    try:
+		        print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+		    except IndexError:
+		        print "MySQL Error: %s" % str(e)
+		c.close()
+		self.db.close()
+
 	def update_token(self, token):
 		c = self.db.cursor()
 		c.execute('''update bong.token set access_token=%s

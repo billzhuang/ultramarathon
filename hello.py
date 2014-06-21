@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
-from flask import Flask, url_for, request, session, redirect, g
+from flask import Flask, url_for, request, session, redirect, g, render_template
 from bong import BongClient
 from datetime import datetime, timedelta
 import _keys
-import MySQLdb
 import _data
 import _entity
 
@@ -65,6 +64,15 @@ def oauth_return():
     oauth_return_url = url_for('oauth_return', _external=True)
     code = request.args.get("code")
     token = bong.get_oauth_token(code, redirect_uri=oauth_return_url)
+    '''check if already cache the token'''
+    oldtoken = _data.DataLayer().user_token(token.uid)
+
+    '''new user first install'''
+    if not oldtoken.exists:
+        _data.DataLayer().create_token(token)
+    else:
+        _data.DataLayer().update_token(token)
+
     session['token'] = token.access_token
     session['uid'] = token.uid
     return redirect(url_for('index'))
@@ -102,24 +110,33 @@ def mystory():
     if partnerinfo is None:
         return redirect(url_for('matchpartner'))
 
-    
-    return "hello"
+    otherInfo = _data.DataLayer().user_info(partnerinfo.friend_uid)
+    otherToken = _data.DataLayer().user_token(otherInfo.uid)
+    otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
+    myinfo = _data.DataLayer().user_info(session['uid'])
+    myToken = _data.DataLayer().user_token(myinfo.uid)
+    myinfo.avatar = bong.user_avator(uid=myinfo.uid, access_token=myToken.access_token)
+
+    print('token:%s,%s' % (session['token'], myToken.access_token))
+    team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
+    return render_template('mystory.html', team=team, entries=(otherInfo, myinfo))
 
 @app.route("/info")
 def show_info():
     profile = bong.get('/1/userInfo/%s' % session['uid'], access_token=session['token'])
-    img = bong.get('/1/userInfo/avatar/%s' % session['uid'], access_token=session['token'])
+    #img = bong.get('/1/userInfo/avatar/%s' % session['uid'], access_token=session['token'])
+    img = bong.user_avator(uid=session['uid'], access_token=session['token'])
     response = 'User ID: %s<br />First day using bong: %s' % \
         (profile['value']['name'], profile['value']['birthday'])
     response += '<img src="data:image/png;base64,%s" alt="%s" />' %\
-        (img['value'], profile['value']['name'])
+        (img, profile['value']['name'])
     return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('show_dayrun') + \
         "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
 
 @app.route("/dayrun")
 def show_dayrun():
     today = datetime.now().strftime('%Y%m%d')
-    running_data = bong.bongday_running(today, uid=session['uid'], access_token=session['token'])
+    running_data = bong.bongday_running_list(today, 5, uid=session['uid'], access_token=session['token'])
     response = u'Today run: %s 米' % running_data
     return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
         "<br /><a href=\"%s\">Logout</a>" % url_for('logout')

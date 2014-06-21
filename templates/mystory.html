@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+  {{team.name}}
+  <ul class=entries>
+  {% for entry in entries %}
+    <li><img src="data:image/png;base64,{{ entry.avatar|safe }}" alt="{{ entry.name }}" /><h2>
+    {{ entry.name }}</h2>
+  {% endfor %}
+  </ul>
+{% endblock %}

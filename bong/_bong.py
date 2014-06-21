@@ -170,7 +170,18 @@ class BongClient(object):
             self.first_date = response['profile']['firstDate']
 
     def bongday_running(self, duedate, **params):
-        detail = self.get('/1/bongday/blocks/%s' % duedate, **params)
+        detail = self.get('1/bongday/blocks/%s' % duedate, **params)
+        running_sum = 0.0
+
+        for activity in detail['value']:
+            if activity['type'] == '2' and \
+                activity['subtype'] == '4':
+                running_sum += Decimal(activity['distance'])
+
+        return running_sum
+
+    def bongday_running_list(self, duedate, num, **params):
+        detail = self.get('1/bongday/blocks/%s/%s' % (duedate, num), **params)
         running_sum = 0.0
 
         for activity in detail['value']:
@@ -184,16 +195,17 @@ class BongClient(object):
         if 'access_token' not in params or 'uid' not in params:
             raise BongAPIError('failed to get user info, cuz lack of token and uid')
 
-        profile = self.get('/1/userInfo/%s' % params['uid'], access_token=params['access_token'])
+        profile = self.get('1/userInfo/%s' % params['uid'], access_token=params['access_token'])
 
         return BongUser(profile['value']['name'],
                         profile['value']['gender'],
                         profile['value']['birthday'])
+
     def user_avator(self, **params):
         if 'access_token' not in params or 'uid' not in params:
             raise BongAPIError('failed to get user avator, cuz lack of token and uid')
 
-        img = self.get('/1/userInfo/avatar/%s' % params['uid'], access_token=params['access_token'])
+        img = self.get('1/userInfo/avatar/%s' % params['uid'], access_token=params['access_token'])
 
         return img['value']
 

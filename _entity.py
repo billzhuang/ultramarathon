@@ -27,3 +27,7 @@ class TeamMember(object):
 	def __init__(self, team_id=None, friend_uid=None):
 		self.team_id = team_id
 		self.friend_uid = friend_uid
+
+class TeamInfo(object):
+	def __init__(self, name=None):
+		self.name = name
