@@ -1,21 +1,65 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
-from flask import Flask, url_for, request, session, redirect
+from flask import Flask, url_for, request, session, redirect, g
 from bong import BongClient
 from datetime import datetime, timedelta
 import _keys
+import MySQLdb
+import _data
+import _entity
 
 app = Flask(__name__)
 
 bong = BongClient(_keys.client_id, _keys.client_secret)
 
+@app.before_request
+def before_request():
+    g.db = MySQLdb.connect(_keys.mysql_host, _keys.mysql_user, _keys.mysql_passwd,
+                           _keys.mysql_db, port=int(_keys.mysql_port))
+    g.data = _data.DataLayer(g.db)
+
+@app.teardown_request
+def teardown_request(exception):
+    if hasattr(g, 'cur'): g.cur.close()
+    if hasattr(g, 'db'): g.db.close()
+
 @app.route("/")
 def index():
+    '''first enter in app'''
     if 'token' not in session:
-        oauth_return_url = url_for('oauth_return', _external=True)
-        auth_url = bong.build_oauth_url(oauth_return_url)
-        return 'Authorize this application: <a href="%s">%s</a>' % \
-            (auth_url, auth_url)
+        uid = request.args.get('uid', '')
+        if uid == '' :
+            return 'Please close and reenter in the app'
+
+        '''check if already cache the token'''
+        token = g.data.user_token(uid)
+
+        '''new user first install'''
+        if not token.exists:
+            oauth_return_url = url_for('oauth_return', _external=True)
+            auth_url = bong.build_oauth_url(oauth_return_url)
+            return redirect(auth_url)
+
+        '''//TODO:check token valid or not, if then refresh Token'''
+        token = bong.refresh_token(token.refresh_token)
+        g.data.update_token(token)
+        session['token'] = token.access_token
+        session['uid'] = token.uid
+
+    '''get user information'''
+    user = g.data.user_info(session['uid'])
+    if not user.exists:
+        user = bong.user_info(session['uid'])
+        g.data.create_user_info(user)
+
+    '''//TODO:check user info expired need refresh'''
+    user2 = bong.user_info(session['uid'])
+    g.data.update_user_info(user2)
+    user = g.data.user_info(session['uid'])
+
+    if user.isactive:
+        return redirect(url_for('show_info'))        
+
     return redirect(url_for('show_info'))
 
 
@@ -58,6 +102,8 @@ def show_dayrun():
     response = u'Today run: %s 米' % running_data
     return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
         "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
+
+
 
 @app.route("/today")
 def today():

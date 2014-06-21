@@ -16,13 +16,20 @@ class BongAPINotModifed(Exception):
     pass
 
 class BongToken(object):
-    def __init__(self, uid=None, access_token=None, access_token_expires_in=None, 
+    def __init__(self, uid=None, access_token=None, expires_in=None, 
                 refresh_token=None, refresh_token_expiration=None):
         self.uid = uid
         self.access_token = access_token
-        self.access_token_expires_in = access_token_expires_in
+        self.expires_in = expires_in
         self.refresh_token = refresh_token
         self.refresh_token_expiration = refresh_token_expiration
+
+class BongUser(object):
+    def __init__(self, name=None, gender=None, birthday=None, avator=None):
+        self.name = name
+        self.gender = gender
+        self.birthday = birthday
+        self.avator = avator
 
 class BongClient(object):
     """OAuth client for the Bong API"""
@@ -173,6 +180,18 @@ class BongClient(object):
                 running_sum += Decimal(activity['distance'])
 
         return running_sum
+
+    def user_info(self, **params):
+        if 'access_token' not in params or 'uid' not in params:
+            raise BongAPIError('failed to get user info, cuz lack of token and uid')
+
+        profile = self.get('/1/userInfo/%s' % params['uid'], access_token=params['access_token'])
+        img = self.get('/1/userInfo/avatar/%s' % params['uid'], access_token=params['token'])
+
+        return BongUser(profile['value']['name'],
+                        profile['value']['gender'],
+                        profile['value']['birthday'],
+                        img['value'])
 
     def __getattr__(self, name):
         '''\
