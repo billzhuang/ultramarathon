@@ -16,7 +16,7 @@ bong = BongClient(_keys.client_id, _keys.client_secret)
 def index():
     try:
         '''first enter in app'''
-        if 'token' not in session:
+        if 'uid' not in session:
             uid = request.args.get('uid', '')
             if uid == '' :
                 oauth_return_url = url_for('oauth_return', _external=True)
@@ -51,13 +51,13 @@ def index():
         '''get user information'''
         user = _data.DataLayer().user_info(session['uid'])
         if user is None:
-            user = bong.user_info(uid=session['uid'], access_token=session['token'])
+            user = bong.user_info(uid=session['uid'], access_token=token.access_token)
             _data.DataLayer().create_user_info(user)
             user = _data.DataLayer().user_info(session['uid'])
 
         '''check user info expired need refresh'''
         if (datetime.now() - user.last_request_time) >= timedelta(seconds = 180):
-            user2 = bong.user_info(uid=session['uid'], access_token=session['token'])
+            user2 = bong.user_info(uid=session['uid'], access_token=token.access_token)
             _data.DataLayer().update_user_info(user2)
             user = _data.DataLayer().user_info(session['uid'])
         #print('lol:%s', user.isactive)
@@ -74,7 +74,7 @@ def _tryRefreshToken(oldtoken):
     #print('hello%s' % oldtoken is None)
     if oldtoken is not None:
         expiredate = oldtoken.last_request_time + timedelta(seconds=oldtoken.expires_in)
-        print('expire:%s' % expiredate)
+        #print('expire:%s' % expiredate)
         if (expiredate - datetime.now()) <= timedelta(hours = 6):
             token = bong.refresh_token(oldtoken.refresh_token)
             _data.DataLayer().update_token(token)
@@ -148,7 +148,7 @@ def mystory():
     canfinish = False
     if not teamsummary is None:
         showsummary = True
-        canfinish = (100000 >= teamsummary.sumdistance)
+        canfinish = (100000 <= teamsummary.sumdistance)
         if teamsummary.avgdistance != Decimal('0.00'):
             teamsummary.leftday = int((100000 - teamsummary.sumdistance) / teamsummary.avgdistance)
         else:
@@ -166,13 +166,14 @@ def mystory():
         myinfo.name = unicode(myinfo.name, 'utf-8')
         myToken = _data.DataLayer().user_token(myinfo.uid)
         myToken = _tryRefreshToken(myToken)
+        session['token'] = myToken.access_token
+        session['uid'] = myToken.uid
         myinfo.avatar = bong.user_avator(uid=myinfo.uid, access_token=myToken.access_token)
     except BongAPIError:
         oauth_return_url = url_for('oauth_return', _external=True)
         auth_url = bong.build_oauth_url(oauth_return_url)
         return redirect(auth_url)
 
-    #print('token:%s,%s' % (session['token'], myToken.access_token))
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
     return render_template('mystory.html', team=team,canfinish=canfinish, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo, myinfo))
 
@@ -190,40 +191,44 @@ def reject():
 
 @app.route("/info")
 def show_info():
-    profile = bong.get('/1/userInfo/%s' % session['uid'], access_token=session['token'])
-    #img = bong.get('/1/userInfo/avatar/%s' % session['uid'], access_token=session['token'])
-    img = bong.user_avator(uid=session['uid'], access_token=session['token'])
+    token = _data.DataLayer().user_token(session['uid'])
+    profile = bong.get('/1/userInfo/%s' % session['uid'], access_token=token.access_token)
+    img = bong.user_avator(uid=session['uid'], access_token=token.access_token)
     response = 'User ID: %s<br />First day using bong: %s' % \
         (profile['value']['name'], profile['value']['birthday'])
     response += '<img src="data:image/png;base64,%s" alt="%s" />' %\
         (img, profile['value']['name'])
-    return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('show_dayrun') + \
-        "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
+    return response
 
-@app.route("/dayrun/<uid>")
-def show_dayrun():
-    fivedayago = (datetime.now() - timedelta(days=30)).strftime('%Y%m%d')
+@app.route("/dayrun/<page>")
+def show_dayrun(page=0):
+    todo = _data.DataLayer().batch_uids(int(page))
+    response = ''
+    for uid in todo:
+        response += uid
+        token = _data.DataLayer().user_token(uid)
+        token = _tryRefreshToken(token)
+        fivedayago = (datetime.now() - timedelta(days=5)).strftime('%Y%m%d')
+        fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
+        daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
+        running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
+        _data.DataLayer().save_activity(uid, 5, daylist, running_data)
+        response += u' run: %s 米</br>' % running_data
+    return response
+
+@app.route("/syncteam/")
+def syncteam():
+    token = _data.DataLayer().user_token(session['uid'])
+    newtoken = _tryRefreshToken(token)
+    if newtoken.access_token != token.access_token:
+        _data.DataLayer().update_token(newtoken)
+    token = newtoken
+    fivedayago = (datetime.now() - timedelta(days=5)).strftime('%Y%m%d')
     fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
     daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
-    running_data = bong.bongday_running_list(fivedayago, 5, uid=session['uid'], access_token=session['token'])
-    _data.DataLayer().save_activity(session['uid'], 5, daylist, running_data)
-    response = u'Today run: %s 米' % running_data
-    return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
-        "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
-
-@app.route("/today")
-def today():
-    today = datetime.now().strftime('%Y%m%d')
-    info = bong.user_summary_daily(today, access_token=session['token'])
-    res = ''
-    for activity in info[0]['summary']:
-        if activity['activity'] == 'wlk':
-            res += 'Walking: %d steps<br />' % activity['steps']
-        elif activity['activity'] == 'run':
-            res += 'Running: %d steps<br />' % activity['steps']
-        elif activity['activity'] == 'cyc':
-            res += 'Cycling: %dm' % activity['distance']
-    return res
+    running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
+    _data.DataLayer().save_activity(token.uid, 5, daylist, running_data)
+    return redirect(url_for('mystory'))
 
 app.secret_key = _keys.secret_key
 

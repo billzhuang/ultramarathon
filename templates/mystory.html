@@ -6,7 +6,7 @@
   {% else %}
   <a href="{{ url_for('reject') }}">换一个人吧</a>
   {% endif %}
-  &nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ url_for('mystory') }}">更新数据</a>
+  &nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ url_for('syncteam') }}">更新数据</a>
   </br>
   {% if showsummary %}
   开始于{{teamsummary.startdate}}，两个人平均每天跑了{{teamsummary.avgdistance}}米,

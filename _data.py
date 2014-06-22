@@ -331,7 +331,7 @@ class DataLayer(object):
 				c = self.db.cursor()
 				c.execute(
 				'''
-				update bong.activity set distance=%s where uid=%s and dueday=%s
+				update bong.activity set distance=%s,updatedate=now() where uid=%s and dueday=%s
 				''', (distancelist[i], uid, daylist[i]))
 
 				c.close()
@@ -346,3 +346,25 @@ class DataLayer(object):
 
 				c.close()
 				self.db.close()
+
+	def batch_uids(self, page):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+			'''
+			select distinct uid from bong.team_member_lnk tml
+			where tml.isactive = 1
+			order by id ASC
+			''')
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		list = []
+		for row in rows:
+			list.append(row[0])
+
+		start = page * 5
+		end = (page + 1) * 5
+
+		return list[start:end]
