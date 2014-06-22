@@ -69,14 +69,6 @@ def _tryRefreshToken(oldtoken):
             return token
         return oldtoken
 
-def _tryRefreshUser(olduser):
-    if olduser is not None:
-        if (datetime.now() - olduser.last_request_time) >= timedelta(seconds = 180):
-            user = bong.user_info(uid=session['uid'], access_token=session['token'])
-            _data.DataLayer().update_user_info(user)
-            return user
-        return olduser
-
 @app.route("/oauth_return")
 def oauth_return():
     error = request.values.get('error', None)
@@ -108,8 +100,8 @@ def logout():
 
 @app.route('/start')
 def start():
-    response = "<br /><a href=\"%s\">Start</a>" % url_for('matchpartner')
-    return response
+    #response = "<br /><a href=\"%s\">Start</a>" % url_for('matchpartner')
+    return render_template('start.html')
 
 @app.route('/matchpartner')
 def matchpartner():
@@ -121,9 +113,17 @@ def matchpartner():
     uid = _data.DataLayer().try_match_user(user)
 
     if uid is None:
-        return u"当前没有用户和你匹配"
+        return render_template('nomatch.html')
 
-    return redirect(url_for('show_dayrun'))
+    return redirect(url_for('mystory'))
+
+@app.route('/deactive')
+def deactive():
+    user = _data.DataLayer().user_info(session['uid'])
+    user.isactive = 0L
+    _data.DataLayer().enable_disable_user(user)
+
+    return u"谢谢你的使用，想完成一次超级马拉松随时再来。"
 
 @app.route('/mystory')
 def mystory():
@@ -133,26 +133,42 @@ def mystory():
 
     teamsummary = _data.DataLayer().team_summary(partnerinfo.team_id)
     showsummary = False
+    canfinish = False
     if not teamsummary is None:
         showsummary = True
+        canfinish = (100000 >= teamsummary.sumdistance)
         if teamsummary.avgdistance != Decimal('0.00'):
-            teamsummary.leftday = ((100000 - teamsummary.sumdistance) / teamsummary.avgdistance).quantize(Decimal('0.00'))
+            teamsummary.leftday = int((100000 - teamsummary.sumdistance) / teamsummary.avgdistance)
         else:
             teamsummary.leftday = 100
 
     otherInfo = _data.DataLayer().user_info(partnerinfo.friend_uid)
+    otherInfo.name = unicode(otherInfo.name, 'utf-8')
     otherToken = _data.DataLayer().user_token(otherInfo.uid)
     otherToken = _tryRefreshToken(otherToken)
     otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
 
     myinfo = _data.DataLayer().user_info(session['uid'])
+    myinfo.name = unicode(myinfo.name, 'utf-8')
     myToken = _data.DataLayer().user_token(myinfo.uid)
     myToken = _tryRefreshToken(myToken)
     myinfo.avatar = bong.user_avator(uid=myinfo.uid, access_token=myToken.access_token)
 
     #print('token:%s,%s' % (session['token'], myToken.access_token))
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
-    return render_template('mystory.html', team=team, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo, myinfo))
+    return render_template('mystory.html', team=team,canfinish=canfinish, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo, myinfo))
+
+@app.route("/finish")
+def finish():
+    partnerinfo = _data.DataLayer().partner_info(session['uid'])
+    _data.DataLayer().finish(partnerinfo.team_id)
+    return render_template('nextaction.html')
+
+@app.route("/reject")
+def reject():
+    partnerinfo = _data.DataLayer().partner_info(session['uid'])
+    _data.DataLayer().reject(partnerinfo.team_id, session['uid'])
+    return render_template('nextaction.html')
 
 @app.route("/info")
 def show_info():
@@ -189,148 +205,6 @@ def today():
             res += 'Running: %d steps<br />' % activity['steps']
         elif activity['activity'] == 'cyc':
             res += 'Cycling: %dm' % activity['distance']
-    return res
-
-
-@app.route("/expanded-summary")
-def expanded_summary():
-    today = datetime.now().strftime('%Y%m%d')
-    info = bong.user_summary_daily(today, access_token=session['token'])
-    res = ''
-    for activity in info[0]['summary']:
-        res = activities_block(activity, res)
-        if activity['activity'] == 'wlk':
-            res += 'Walking: %d steps<br />' % activity['steps']
-            res += 'Walking: %d calories<br />' % activity['calories']
-            res += 'Walking: %d distance<br />' % activity['distance']
-            res += 'Walking: %d duration<br /><br />' % activity['duration']
-        elif activity['activity'] == 'run':
-            res += 'Running: %d steps<br />' % activity['steps']
-            res += 'Running: %d calories<br />' % activity['calories']
-            res += 'Running: %d distance<br />' % activity['distance']
-            res += 'Running: %d duration<br /><br />' % activity['duration']
-        elif activity['activity'] == 'cyc':
-            res += 'Cycling: %dm<br />' % activity['distance']
-            res += 'Cycling: %d calories<br />' % activity['calories']
-            res += 'Cycling: %d distance<br />' % activity['distance']
-            res += 'Cycling: %d duration<br />' % activity['duration']
-    return res
-
-
-@app.route("/activities")
-def activities():
-    today = datetime.now().strftime('%Y%m%d')
-    info = bong.user_activities_daily(today, access_token=session['token'])
-    res = ''
-    for segment in info[0]['segments']:
-        if segment['type'] == 'move':
-            res += 'Move<br />'
-            res = segment_start_end(segment, res)
-            for activity in segment['activities']:
-                res += 'Activity %s<br />' % activity['activity']
-                res = activity_start_end(activity, res)
-                res += 'Duration: %d<br />' % activity['duration']
-                res += 'Distance: %dm<br />' % activity['distance']
-            res += '<br />'
-        elif segment['type'] == 'place':
-            res += 'Place<br />'
-            res = segment_start_end(segment, res)
-            for activity in segment['activities']:
-                res += 'Activity %s<br />' % activity['activity']
-                res = activity_start_end(activity, res)
-                res += 'Duration: %d<br />' % activity['duration']
-                res += 'Distance: %dm<br />' % activity['distance']
-            res += '<br />'
-    return res
-
-
-@app.route("/places")
-def places():
-    today = datetime.now().strftime('%Y%m%d')
-    info = bong.user_places_daily(today, access_token=session['token'])
-    res = ''
-    for segment in info[0]['segments']:
-        res = place(segment, res)
-    return res
-
-
-@app.route("/storyline")
-def storyline():
-    today = datetime.now().strftime('%Y%m%d')
-    info = bong.user_storyline_daily(today, trackPoints={'true'}, access_token=session['token'])
-    res = ''
-    for segment in info[0]['segments']:
-        if segment['type'] == 'place':
-            res = place(segment, res)
-        elif segment['type'] == 'move':
-            res = move(segment, res)
-        res += '<hr>'
-    return res
-
-
-def segment_start_end(segment, res):
-    res += 'Start Time: %s<br />' % segment['startTime']
-    res += 'End Time: %s<br />' % segment['endTime']
-    return res
-
-
-def activity_start_end(activity, res):
-    res += 'Start Time: %s<br />' % activity['startTime']
-    res += 'End Time: %s<br />' % activity['endTime']
-    return res
-
-
-def place_block(segment, res):
-    res += 'ID: %d<br />' % segment['place']['id']
-    res += 'Name: %s<br />' % segment['place']['name']
-    res += 'Type: %s<br />' % segment['place']['type']
-    if segment['place']['type'] == 'foursquare':
-        res += 'Foursquare ID: %s<br />' % segment['place']['foursquareId']
-    res += 'Location<br />'
-    res += 'Latitude: %f<br />' % segment['place']['location']['lat']
-    res += 'Longitude: %f<br />' % segment['place']['location']['lon']
-    return res
-
-
-def trackPoint(track_point, res):
-    res += 'Latitude: %f<br />' % track_point['lat']
-    res += 'Longitude: %f<br />' % track_point['lon']
-    res += 'Time: %s<br />' % track_point['time']
-    return res
-
-
-def activities_block(activity, res):
-    res += 'Activity: %s<br />' % activity['activity']
-    res = activity_start_end(activity, res)
-    res += 'Duration: %d<br />' % activity['duration']
-    res += 'Distance: %dm<br />' % activity['distance']
-    if activity['activity'] == 'wlk' or activity['activity'] == 'run':
-        res += 'Steps: %d<br />' % activity['steps']
-    if activity['activity'] != 'trp':
-        res += 'Calories: %d<br />' % activity['calories']
-    if 'trackPoints' in activity:
-        for track_point in activity['trackPoints']:
-            res = trackPoint(track_point, res)
-    return res
-
-
-def place(segment, res):
-    res += 'Place<br />'
-    res = segment_start_end(segment, res)
-    res = place_block(segment, res)
-    if 'activities' in segment:
-        for activity in segment['activities']:
-            res = activities_block(activity, res)
-    res += '<br />'
-    return res
-
-
-def move(segment, res):
-    res += 'Move<br />'
-    res = segment_start_end(segment, res)
-    for activity in segment['activities']:
-        res = activities_block(activity, res)
-    res += '<br />'
     return res
 
 app.secret_key = _keys.secret_key

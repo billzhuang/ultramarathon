@@ -1,6 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
   <h3>{{team.name}}</h3>
+  {% if canfinish %}
+  <a href="{{ url_for('finish') }}">完成</a>
+  {% else %}
+  <a href="{{ url_for('reject') }}">换一个人吧</a>
+  {% endif %}
   </br>
   {% if showsummary %}
   开始于{{teamsummary.startdate}}，两个人平均每天跑了{{teamsummary.avgdistance}}米,
@@ -16,4 +21,21 @@
     {% endif %}
     </br>
   {% endfor %}
+  </br>
+  我想在让我最心动的幻想</br>
+  最懒惰的时刻离开</br>
+  在这路的尽头</br>
+  会不会是另一个世界</br>
+  我所有的幻想</br>
+  不再遥远</br>
+  </br></br></br></br>
+  <h4>规则：</h4>
+  <ul>
+    <li>每天两人加起来若不到4公里，本天积累的公里减半</li>
+    <li>尽量少点上面的换人按钮，否则很容易最后就这么剩下了</li>
+    <li>超级马拉松全程是100公里，嘿嘿</li>
+    <li>至少每三天同步一次bong，常来这里看看，积攒人品</li>
+    <li>里程数从你第一次见到TA的头像就开始了，努力到最后吧</li>
+    <li>首位完成100个超级马拉松的朋友获得bong一个，由第二个达到的人出</li>
+  </ul>
 {% endblock %}

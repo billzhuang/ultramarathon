@@ -129,6 +129,46 @@ class DataLayer(object):
 		c.close()
 		self.db.close()
 
+	def finish(self, team_id):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute('''
+				update bong.team
+				set status='finished', enddate=current_date()
+				where id=%s;
+
+				update bong.team_member_lnk
+				set isactive=0, updatedate=now()
+				where team_id=%s;
+					'''
+				, (team_id, team_id))
+		#self.db.commit()
+
+		c.close()
+		self.db.close()
+
+	def reject(self, team_id, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute('''
+				update bong.team
+				set status='failed', enddate=current_date()
+				where id=%s;
+
+				update bong.team_member_lnk
+				set isactive=0, updatedate=now()
+				where team_id=%s;
+
+				update bong.team_member_lnk
+				set status = 'rejected'
+				where team_id=%s and uid != %s;
+					'''
+				, (team_id, team_id, team_id, uid))
+		#self.db.commit()
+
+		c.close()
+		self.db.close()
+
 	def try_match_user(self, user):
 		self.reinitdb()
 		c = self.db.cursor()
