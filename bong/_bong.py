@@ -25,10 +25,11 @@ class BongToken(object):
         self.refresh_token_expiration = refresh_token_expiration
 
 class BongUser(object):
-    def __init__(self, name=None, gender=None, birthday=None, avatar=None):
+    def __init__(self, name=None, gender=None, birthday=None, uid=None):
         self.name = name
         self.gender = gender
         self.birthday = birthday
+        self.uid = uid
 
 class BongClient(object):
     """OAuth client for the Bong API"""
@@ -171,25 +172,28 @@ class BongClient(object):
 
     def bongday_running(self, duedate, **params):
         detail = self.get('1/bongday/blocks/%s' % duedate, **params)
-        running_sum = 0.0
+        running_sum = Decimal('0.0')
 
         for activity in detail['value']:
-            if activity['type'] == '2' and \
-                activity['subtype'] == '4':
-                running_sum += Decimal(activity['distance'])
+                    if activity['type'] == 2 and \
+                        activity['subType'] == 4:
+                        running_sum += Decimal(activity['distance'])
 
-        return running_sum
+        return running_sum.quantize(Decimal('0.00'))
+        
 
     def bongday_running_list(self, duedate, num, **params):
         detail = self.get('1/bongday/blocks/%s/%s' % (duedate, num), **params)
-        running_sum = 0.0
 
-        for activity in detail['value']:
-            if activity['type'] == '2' and \
-                activity['subtype'] == '4':
-                running_sum += Decimal(activity['distance'])
+        list = []
+        for day in detail['value']:
+            running_sum = Decimal('0.0')
+            for activity in day['blockList']:
+                if activity['type'] == 2 and activity['subType'] == 4:
+                    running_sum += Decimal(activity['distance'])
+            list.append(running_sum.quantize(Decimal('0.00')))
 
-        return running_sum
+        return list
 
     def user_info(self, **params):
         if 'access_token' not in params or 'uid' not in params:
@@ -199,7 +203,8 @@ class BongClient(object):
 
         return BongUser(profile['value']['name'],
                         profile['value']['gender'],
-                        profile['value']['birthday'])
+                        profile['value']['birthday'],
+                        params['uid'])
 
     def user_avator(self, **params):
         if 'access_token' not in params or 'uid' not in params:

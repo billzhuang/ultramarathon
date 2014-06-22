@@ -3,13 +3,14 @@
 import _entity
 import _keys
 import MySQLdb
+from decimal import Decimal
 
 class DataLayer(object):
 	def __init__(self):
-		self.db = MySQLdb.connect(_keys.mysql_host, _keys.mysql_user, _keys.mysql_passwd,
+		'''self.db = MySQLdb.connect(_keys.mysql_host, _keys.mysql_user, _keys.mysql_passwd,
                            _keys.mysql_db, port=int(_keys.mysql_port))
 		self.db.set_character_set('utf8')
-		self.db.autocommit(True)
+		self.db.autocommit(True)'''
 
 	def reinitdb(self):
 		self.db = MySQLdb.connect(_keys.mysql_host, _keys.mysql_user, _keys.mysql_passwd,
@@ -18,26 +19,26 @@ class DataLayer(object):
 		self.db.autocommit(True)
 
 	def user_token(self, uid):
+		self.reinitdb()
 		c = self.db.cursor()
 		c.execute('select uid,access_token,expires_in,refresh_token,updatedate from bong.token where uid=%s', uid)
 		#self.db.commit()
-
-		exists = c.rowcount != 0L
 		row = c.fetchone()
 		c.close()
 		self.db.close()
 
 		if row is None:
-			return _entity.TokenInfo(exists=exists)
+			return None
 
-		return _entity.TokenInfo(exists,
+		return _entity.TokenInfo(
 						row[0],
 						row[1],
 						row[2],
 						row[3],
 						row[4])
 
-	def create_tokon(self, token):
+	def create_token(self, token):
+		self.reinitdb()
 		c = self.db.cursor()
 		try:
 			c.execute('''insert into bong.token
@@ -54,6 +55,7 @@ class DataLayer(object):
 		self.db.close()
 
 	def update_token(self, token):
+		self.reinitdb()
 		c = self.db.cursor()
 		c.execute('''update bong.token set access_token=%s
 					, expires_in=%s
@@ -67,19 +69,18 @@ class DataLayer(object):
 		self.db.close()
 
 	def user_info(self, uid):
+		self.reinitdb()
 		c = self.db.cursor()
 		c.execute('select name,gender,birthday,isactive,updatedate,uid from bong.member where uid=%s', uid)
 		#self.db.commit()
-
-		exists = c.rowcount != 0L
 		row = c.fetchone()
 		c.close()
 		self.db.close()
 
 		if row is None:
-			return _entity.UserInfo(exists=exists)
+			return None
 
-		return _entity.UserInfo(exists,
+		return _entity.UserInfo(
 						row[0],
 						row[1],
 						row[2],
@@ -88,6 +89,7 @@ class DataLayer(object):
 						row[5])
 
 	def create_user_info(self, user):
+		self.reinitdb()
 		c = self.db.cursor()
 		try:
 			c.execute('insert into bong.member(uid,name,gender,birthday,isactive) values(%s,%s,%s,%s,0)'
@@ -102,6 +104,7 @@ class DataLayer(object):
 		self.db.close()
 
 	def update_user_info(self, user):
+		self.reinitdb()
 		c = self.db.cursor()
 		c.execute('''update bong.member set name=%s
 					, gender=%s
@@ -115,6 +118,7 @@ class DataLayer(object):
 		self.db.close()
 
 	def enable_disable_user(self, user):
+		self.reinitdb()
 		c = self.db.cursor()
 		c.execute('''update bong.member set isactive=%s
 					, updatedate=now() 
@@ -126,6 +130,7 @@ class DataLayer(object):
 		self.db.close()
 
 	def try_match_user(self, user):
+		self.reinitdb()
 		c = self.db.cursor()
 		c.execute(
 		'''
@@ -167,7 +172,7 @@ class DataLayer(object):
 		c = self.db.cursor()
 		c.execute(
 			'''
-			insert into bong.team(name,status) values(%s,%s);
+			insert into bong.team(name,status,startdate) values(%s,%s,current_date());
 			''', ('', 'new'))
 		#self.db.commit()
 		c.close()
@@ -195,10 +200,11 @@ class DataLayer(object):
 			where uid in (%s,%s) and isactive=1;
 			''', (uid1, uid2))
 		#self.db.commit()
+		rowcount2 = c2.rowcount
 		c2.close()
 		self.db.close()
 
-		if c2.rowcount != 2L:
+		if rowcount2 != 2L:
 			self.reinitdb()
 			c3 = self.db.cursor()
 			c3.execute(
@@ -218,6 +224,7 @@ class DataLayer(object):
 			return True
 
 	def partner_info(self, uid):
+		self.reinitdb()
 		c = self.db.cursor()
 		c.execute(
 		'''
@@ -237,3 +244,65 @@ class DataLayer(object):
 			return None
 
 		return _entity.TeamMember(row[0], row[1])
+
+	def team_summary(self, team_id):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select a.startdate, max(a.dueday) as syncdate, avg(a.distance) as avg1, sum(a.distance) as sum1
+		from(
+		select t.startdate, a.dueday, sum(a.distance) as distance
+		from bong.team_member_lnk tml 
+		left join bong.activity a
+			on tml.uid = a.uid
+		join bong.team t
+			on t.id = tml.team_id
+		where tml.team_id=%s and a.dueday >= t.startdate
+		group by t.startdate, a.dueday)a
+		group by a.startdate
+		'''
+		, team_id)
+
+		row = c.fetchone()
+		c.close()
+		self.db.close()
+
+		if row is None:
+			return None
+
+		return _entity.TeamSummary(row[0], row[1], Decimal(row[2]).quantize(Decimal('0.00')), Decimal(row[3]).quantize(Decimal('0.00')))
+
+
+	def save_activity(self, uid, num, daylist, distancelist):
+		for i in range(num):
+			self.reinitdb()
+			c = self.db.cursor()
+			c.execute(
+			'''
+			select uid from bong.activity where uid=%s and dueday=%s
+			''', (uid, daylist[i]))
+			rowcount = c.rowcount
+			c.close()
+			self.db.close()
+
+			if rowcount != 0L:
+				self.reinitdb()
+				c = self.db.cursor()
+				c.execute(
+				'''
+				update bong.activity set distance=%s where uid=%s and dueday=%s
+				''', (distancelist[i], uid, daylist[i]))
+
+				c.close()
+				self.db.close()
+			else:
+				self.reinitdb()
+				c = self.db.cursor()
+				c.execute(
+				'''
+				insert into bong.activity(uid, dueday, distance, updatedate) values(%s, %s, %s, now())
+				''', (uid, daylist[i], distancelist[i]))
+
+				c.close()
+				self.db.close()

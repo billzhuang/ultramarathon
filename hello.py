@@ -3,6 +3,7 @@
 from flask import Flask, url_for, request, session, redirect, g, render_template
 from bong import BongClient
 from datetime import datetime, timedelta
+from decimal import Decimal
 import _keys
 import _data
 import _entity
@@ -25,36 +26,56 @@ def index():
         token = _data.DataLayer().user_token(uid)
 
         '''new user first install'''
-        if not token.exists:
+        if token is None:
             oauth_return_url = url_for('oauth_return', _external=True)
             auth_url = bong.build_oauth_url(oauth_return_url)
             return redirect(auth_url)
 
-        '''//TODO:check token valid or not, if then refresh Token'''
-        token = bong.refresh_token(token.refresh_token)
-        _data.DataLayer().update_token(token)
+        '''check token valid or not, if then refresh Token'''
+        token = _tryRefreshToken(token)
         session['token'] = token.access_token
         session['uid'] = token.uid
 
+    '''check token again'''
+    token = _data.DataLayer().user_token(session['uid'])
+    token = _tryRefreshToken(token)
+    session['token'] = token.access_token
+    session['uid'] = token.uid
     '''get user information'''
     user = _data.DataLayer().user_info(session['uid'])
-    if not user.exists:
+    if user is None:
         user = bong.user_info(uid=session['uid'], access_token=session['token'])
-        user.uid=session['uid']
-        #print('%s,%s,%s,%s', user.uid ,user.name, user.gender, user.birthday)
         _data.DataLayer().create_user_info(user)
 
-    '''//TODO:check user info expired need refresh'''
-    user2 = bong.user_info(uid=session['uid'], access_token=session['token'])
-    user2.uid=session['uid']
-    _data.DataLayer().update_user_info(user2)
-    user = _data.DataLayer().user_info(session['uid'])
-    print('lol:%s', user.isactive)
+    '''check user info expired need refresh'''
+    if (datetime.now() - user.last_request_time) >= timedelta(seconds = 180):
+        user2 = bong.user_info(uid=session['uid'], access_token=session['token'])
+        _data.DataLayer().update_user_info(user2)
+        user = _data.DataLayer().user_info(session['uid'])
+    #print('lol:%s', user.isactive)
     if user.isactive == 0L:
         return redirect(url_for('start'))        
 
     return redirect(url_for('mystory'))
 
+def _tryRefreshToken(oldtoken):
+    #print('hello%s' % oldtoken is None)
+    if oldtoken is not None:
+        expiredate = oldtoken.last_request_time + timedelta(seconds=oldtoken.expires_in)
+        print('expire:%s' % expiredate)
+        if (expiredate - datetime.now()) <= timedelta(hours = 6):
+            token = bong.refresh_token(oldtoken.refresh_token)
+            _data.DataLayer().update_token(token)
+            return token
+        return oldtoken
+
+def _tryRefreshUser(olduser):
+    if olduser is not None:
+        if (datetime.now() - olduser.last_request_time) >= timedelta(seconds = 180):
+            user = bong.user_info(uid=session['uid'], access_token=session['token'])
+            _data.DataLayer().update_user_info(user)
+            return user
+        return olduser
 
 @app.route("/oauth_return")
 def oauth_return():
@@ -68,7 +89,7 @@ def oauth_return():
     oldtoken = _data.DataLayer().user_token(token.uid)
 
     '''new user first install'''
-    if not oldtoken.exists:
+    if oldtoken is None:
         _data.DataLayer().create_token(token)
     else:
         _data.DataLayer().update_token(token)
@@ -110,16 +131,28 @@ def mystory():
     if partnerinfo is None:
         return redirect(url_for('matchpartner'))
 
+    teamsummary = _data.DataLayer().team_summary(partnerinfo.team_id)
+    showsummary = False
+    if not teamsummary is None:
+        showsummary = True
+        if teamsummary.avgdistance != Decimal('0.00'):
+            teamsummary.leftday = ((100000 - teamsummary.sumdistance) / teamsummary.avgdistance).quantize(Decimal('0.00'))
+        else:
+            teamsummary.leftday = 100
+
     otherInfo = _data.DataLayer().user_info(partnerinfo.friend_uid)
     otherToken = _data.DataLayer().user_token(otherInfo.uid)
+    otherToken = _tryRefreshToken(otherToken)
     otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
+
     myinfo = _data.DataLayer().user_info(session['uid'])
     myToken = _data.DataLayer().user_token(myinfo.uid)
+    myToken = _tryRefreshToken(myToken)
     myinfo.avatar = bong.user_avator(uid=myinfo.uid, access_token=myToken.access_token)
 
-    print('token:%s,%s' % (session['token'], myToken.access_token))
+    #print('token:%s,%s' % (session['token'], myToken.access_token))
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
-    return render_template('mystory.html', team=team, entries=(otherInfo, myinfo))
+    return render_template('mystory.html', team=team, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo, myinfo))
 
 @app.route("/info")
 def show_info():
@@ -135,8 +168,11 @@ def show_info():
 
 @app.route("/dayrun")
 def show_dayrun():
-    today = datetime.now().strftime('%Y%m%d')
-    running_data = bong.bongday_running_list(today, 5, uid=session['uid'], access_token=session['token'])
+    fivedayago = (datetime.now() - timedelta(days=30)).strftime('%Y%m%d')
+    fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
+    daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
+    running_data = bong.bongday_running_list(fivedayago, 5, uid=session['uid'], access_token=session['token'])
+    _data.DataLayer().save_activity(session['uid'], 5, daylist, running_data)
     response = u'Today run: %s 米' % running_data
     return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
         "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
