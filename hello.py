@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 from flask import Flask, url_for, request, session, redirect, g, render_template
-from bong import BongClient
+from bong import BongClient, BongAPIError
 from datetime import datetime, timedelta
 from decimal import Decimal
 import _keys
@@ -14,49 +14,61 @@ bong = BongClient(_keys.client_id, _keys.client_secret)
 
 @app.route("/")
 def index():
-    '''first enter in app'''
-    if 'token' not in session:
-        uid = request.args.get('uid', '')
-        if uid == '' :
-            oauth_return_url = url_for('oauth_return', _external=True)
-            auth_url = bong.build_oauth_url(oauth_return_url)
-            return "<br /><a href=\"%s\">login</a>" % auth_url
+    try:
+        '''first enter in app'''
+        if 'token' not in session:
+            uid = request.args.get('uid', '')
+            if uid == '' :
+                oauth_return_url = url_for('oauth_return', _external=True)
+                auth_url = bong.build_oauth_url(oauth_return_url)
+                return redirect(auth_url)
 
-        '''check if already cache the token'''
-        token = _data.DataLayer().user_token(uid)
+            '''check if already cache the token'''
+            token = _data.DataLayer().user_token(uid)
 
-        '''new user first install'''
+            '''new user first install'''
+            if token is None:
+                oauth_return_url = url_for('oauth_return', _external=True)
+                auth_url = bong.build_oauth_url(oauth_return_url)
+                return redirect(auth_url)
+
+            '''check token valid or not, if then refresh Token'''
+            token = _tryRefreshToken(token)
+            session['token'] = token.access_token
+            session['uid'] = token.uid
+
+        '''check token again'''
+        token = _data.DataLayer().user_token(session['uid'])
+        '''why???'''
         if token is None:
             oauth_return_url = url_for('oauth_return', _external=True)
             auth_url = bong.build_oauth_url(oauth_return_url)
             return redirect(auth_url)
 
-        '''check token valid or not, if then refresh Token'''
         token = _tryRefreshToken(token)
         session['token'] = token.access_token
         session['uid'] = token.uid
-
-    '''check token again'''
-    token = _data.DataLayer().user_token(session['uid'])
-    token = _tryRefreshToken(token)
-    session['token'] = token.access_token
-    session['uid'] = token.uid
-    '''get user information'''
-    user = _data.DataLayer().user_info(session['uid'])
-    if user is None:
-        user = bong.user_info(uid=session['uid'], access_token=session['token'])
-        _data.DataLayer().create_user_info(user)
-
-    '''check user info expired need refresh'''
-    if (datetime.now() - user.last_request_time) >= timedelta(seconds = 180):
-        user2 = bong.user_info(uid=session['uid'], access_token=session['token'])
-        _data.DataLayer().update_user_info(user2)
+        '''get user information'''
         user = _data.DataLayer().user_info(session['uid'])
-    #print('lol:%s', user.isactive)
-    if user.isactive == 0L:
-        return redirect(url_for('start'))        
+        if user is None:
+            user = bong.user_info(uid=session['uid'], access_token=session['token'])
+            _data.DataLayer().create_user_info(user)
+            user = _data.DataLayer().user_info(session['uid'])
 
-    return redirect(url_for('mystory'))
+        '''check user info expired need refresh'''
+        if (datetime.now() - user.last_request_time) >= timedelta(seconds = 180):
+            user2 = bong.user_info(uid=session['uid'], access_token=session['token'])
+            _data.DataLayer().update_user_info(user2)
+            user = _data.DataLayer().user_info(session['uid'])
+        #print('lol:%s', user.isactive)
+        if user.isactive == 0L:
+            return redirect(url_for('start'))        
+
+        return redirect(url_for('mystory'))
+    except BongAPIError:
+        oauth_return_url = url_for('oauth_return', _external=True)
+        auth_url = bong.build_oauth_url(oauth_return_url)
+        return redirect(auth_url)
 
 def _tryRefreshToken(oldtoken):
     #print('hello%s' % oldtoken is None)
@@ -141,18 +153,24 @@ def mystory():
             teamsummary.leftday = int((100000 - teamsummary.sumdistance) / teamsummary.avgdistance)
         else:
             teamsummary.leftday = 100
-
-    otherInfo = _data.DataLayer().user_info(partnerinfo.friend_uid)
-    otherInfo.name = unicode(otherInfo.name, 'utf-8')
-    otherToken = _data.DataLayer().user_token(otherInfo.uid)
-    otherToken = _tryRefreshToken(otherToken)
-    otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
-
-    myinfo = _data.DataLayer().user_info(session['uid'])
-    myinfo.name = unicode(myinfo.name, 'utf-8')
-    myToken = _data.DataLayer().user_token(myinfo.uid)
-    myToken = _tryRefreshToken(myToken)
-    myinfo.avatar = bong.user_avator(uid=myinfo.uid, access_token=myToken.access_token)
+    try:
+        otherInfo = _data.DataLayer().user_info(partnerinfo.friend_uid)
+        otherInfo.name = unicode(otherInfo.name, 'utf-8')
+        otherToken = _data.DataLayer().user_token(otherInfo.uid)
+        otherToken = _tryRefreshToken(otherToken)
+        otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
+    except BongAPIError:
+         otherInfo = _entity.UserInfo()
+    try:
+        myinfo = _data.DataLayer().user_info(session['uid'])
+        myinfo.name = unicode(myinfo.name, 'utf-8')
+        myToken = _data.DataLayer().user_token(myinfo.uid)
+        myToken = _tryRefreshToken(myToken)
+        myinfo.avatar = bong.user_avator(uid=myinfo.uid, access_token=myToken.access_token)
+    except BongAPIError:
+        oauth_return_url = url_for('oauth_return', _external=True)
+        auth_url = bong.build_oauth_url(oauth_return_url)
+        return redirect(auth_url)
 
     #print('token:%s,%s' % (session['token'], myToken.access_token))
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
@@ -182,7 +200,7 @@ def show_info():
     return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('show_dayrun') + \
         "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
 
-@app.route("/dayrun")
+@app.route("/dayrun/<uid>")
 def show_dayrun():
     fivedayago = (datetime.now() - timedelta(days=30)).strftime('%Y%m%d')
     fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')

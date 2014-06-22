@@ -6,6 +6,7 @@
   {% else %}
   <a href="{{ url_for('reject') }}">换一个人吧</a>
   {% endif %}
+  &nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ url_for('mystory') }}">更新数据</a>
   </br>
   {% if showsummary %}
   开始于{{teamsummary.startdate}}，两个人平均每天跑了{{teamsummary.avgdistance}}米,
@@ -36,6 +37,6 @@
     <li>超级马拉松全程是100公里，嘿嘿</li>
     <li>至少每三天同步一次bong，常来这里看看，积攒人品</li>
     <li>里程数从你第一次见到TA的头像就开始了，努力到最后吧</li>
-    <li>首位完成100个超级马拉松的朋友获得bong一个，由第二个达到的人出</li>
+    <li>首位完成100个超级马拉松的朋友获得bong一个，由第二个到达的人出</li>
   </ul>
 {% endblock %}
