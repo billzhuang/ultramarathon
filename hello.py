@@ -215,9 +215,9 @@ def show_dayrun(page=0):
             response += uid
             token = _data.DataLayer().user_token(uid)
             token = _tryRefreshToken(token)
-            fivedayago = (datetime.now() - timedelta(days=4)).strftime('%Y%m%d')
+            fivedayago = (datetime.now() - timedelta(days=2)).strftime('%Y%m%d')
             fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
-            daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
+            daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(3)]
             running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
             _data.DataLayer().save_activity(uid, 5, daylist, running_data)
             response += u' run: %s 米</br>' % running_data
