@@ -33,7 +33,7 @@ class BongUser(object):
 
 class BongClient(object):
     """OAuth client for the Bong API"""
-    api_url = "http://open.bong.cn"
+    api_url = "https://open.bong.cn"
     web_auth_uri = api_url + "/oauth/authorize"
     token_url = api_url + "/oauth/token"
     refresh_url = token_url
