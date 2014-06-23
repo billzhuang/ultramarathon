@@ -174,8 +174,7 @@ def mystory():
         otherToken = _tryRefreshToken(otherToken)
         otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
     except BongAPIError:
-         otherInfo = _entity.UserInfo()
-    
+        '''no avator'''
     myinfo = _data.DataLayer().user_info(session['uid'])
     myinfo.name = unicode(myinfo.name, 'utf-8')
 
