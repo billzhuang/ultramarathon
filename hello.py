@@ -104,6 +104,10 @@ def oauth_return():
     session['uid'] = token.uid
     return redirect(url_for('index'))
 
+@app.errorhandler(500)
+def internal_error(exception):
+    app.logger.exception(exception)
+    return render_template('500.html'), 500
 
 @app.route('/logout')
 def logout():
@@ -233,6 +237,15 @@ def syncteam():
     return redirect(url_for('mystory'))
 
 app.secret_key = _keys.secret_key
+
+if app.debug is not True:   
+    import logging
+    from logging.handlers import RotatingFileHandler
+    file_handler = RotatingFileHandler('/var/log/ultramarathon/appexception.log', maxBytes=1024 * 1024 * 100, backupCount=20)
+    file_handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter("%(asctime)s - %(funcName)s - %(levelname)s - %(message)s")
+    file_handler.setFormatter(formatter)
+    app.logger.addHandler(file_handler)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
