@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 from flask import Flask, url_for, request, session, redirect, g, render_template
+from werkzeug.contrib.fixers import ProxyFix
 from bong import BongClient, BongAPIError
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -9,6 +10,7 @@ import _data
 import _entity
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 bong = BongClient(_keys.client_id, _keys.client_secret)
 
