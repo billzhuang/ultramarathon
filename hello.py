@@ -72,12 +72,12 @@ def index():
         auth_url = bong.build_oauth_url(oauth_return_url)
         return redirect(auth_url)
 
-def _tryRefreshToken(oldtoken):
+def _tryRefreshToken(oldtoken, forcerefresh=False):
     #print('hello%s' % oldtoken is None)
     if oldtoken is not None:
         expiredate = oldtoken.last_request_time + timedelta(seconds=oldtoken.expires_in)
         #print('expire:%s' % expiredate)
-        if (expiredate - datetime.now()) <= timedelta(hours = 6):
+        if (forcerefresh or (expiredate - datetime.now()) <= timedelta(hours = 6)):
             token = bong.refresh_token(oldtoken.refresh_token)
             _data.DataLayer().update_token(token)
             return token
@@ -207,15 +207,18 @@ def show_dayrun(page=0):
     todo = _data.DataLayer().batch_uids(int(page))
     response = ''
     for uid in todo:
-        response += uid
-        token = _data.DataLayer().user_token(uid)
-        token = _tryRefreshToken(token)
-        fivedayago = (datetime.now() - timedelta(days=4)).strftime('%Y%m%d')
-        fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
-        daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
-        running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
-        _data.DataLayer().save_activity(uid, 5, daylist, running_data)
-        response += u' run: %s 米</br>' % running_data
+        try:
+            response += uid
+            token = _data.DataLayer().user_token(uid)
+            token = _tryRefreshToken(token, True)
+            fivedayago = (datetime.now() - timedelta(days=4)).strftime('%Y%m%d')
+            fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
+            daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
+            running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
+            _data.DataLayer().save_activity(uid, 5, daylist, running_data)
+            response += u' run: %s 米</br>' % running_data
+        except BongAPIError:
+            response += '%s cannot refresh data' % uid
     return response
 
 '''
