@@ -189,7 +189,7 @@ class DataLayer(object):
 		)
 		and m.uid != %s
 		and m.isactive =1
-		''', (user.uid, user.uid, user.uid))
+		''', (user.uid, user.uid))
 		#self.db.commit()
 
 		rows = c.fetchall()
