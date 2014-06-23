@@ -218,7 +218,11 @@ def show_dayrun(page=0):
             _data.DataLayer().save_activity(uid, 5, daylist, running_data)
             response += u' run: %s 米</br>' % running_data
         except BongAPIError:
-            token = _tryRefreshToken(token, True)
+            try:
+                token = _tryRefreshToken(token, True)
+            except:
+                response += '%s refresh_token error' % uid
+                
             response += '%s cannot refresh data' % uid
     return response
 
