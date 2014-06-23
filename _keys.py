@@ -5,7 +5,7 @@ secret_key = client_secret
 
 mysql_host = '127.0.0.1'
 mysql_user = 'root'
-mysql_passwd = '820118'
+mysql_passwd = '1982SHUmin'
 mysql_db = 'bong'
 mysql_port = '3306'
 #mysql_port = '4041'
