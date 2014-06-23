@@ -210,7 +210,7 @@ def show_dayrun(page=0):
         try:
             response += uid
             token = _data.DataLayer().user_token(uid)
-            token = _tryRefreshToken(token, True)
+            token = _tryRefreshToken(token)
             fivedayago = (datetime.now() - timedelta(days=4)).strftime('%Y%m%d')
             fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
             daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
@@ -218,6 +218,7 @@ def show_dayrun(page=0):
             _data.DataLayer().save_activity(uid, 5, daylist, running_data)
             response += u' run: %s 米</br>' % running_data
         except BongAPIError:
+            token = _tryRefreshToken(token, True)
             response += '%s cannot refresh data' % uid
     return response
 
