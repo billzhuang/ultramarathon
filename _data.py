@@ -180,8 +180,16 @@ class DataLayer(object):
 		select l.uid from bong.team_member_lnk as l
 		where l.isactive = 1
 		)
+		and m.uid not in
+		(
+		select distinct l3.uid from bong.team_member_lnk l2
+		join bong.team_member_lnk l3
+			on l2.team_id = l3.team_id and l3.uid != %s
+		where l2.uid = %s and l2.status='rejected' and TIMESTAMPDIFF(HOUR,l2.updatedate ,now()) <  48
+		)
 		and m.uid != %s
-		and m.isactive =1''', user.uid)
+		and m.isactive =1
+		''', (user.uid, user.uid, user.uid))
 		#self.db.commit()
 
 		rows = c.fetchall()

@@ -1,12 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h3>准备好了么？是时候告别一个人孤单跑步了吧...</h3>
- 	你若失去了财产——你只失去了一点儿。 </br>
-	你若失去了荣誉——你就丢掉了许多。 </br>
-	你若失去了勇敢——你就把一切都失掉了！ </br>
-	——歌 德</br>
+  <h3>{{user.name}}</h3>, 想告别一个人孤单跑步的日子么？
   </br>
-  <a href="{{ url_for('matchpartner') }}">我等不急啦</a>
-  </br></br></br></br>
-  <a href="{{ url_for('matchpartner') }}">什么玩意！我偏要试试看</a>
+  <img src="data:image/png;base64,{{ user.avatar|safe }}" alt="竟然没有头像" />
+  </br>
+  <a href="{{ url_for('matchpartner') }}">好的</a>
 {% endblock %}

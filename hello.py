@@ -118,8 +118,11 @@ def logout():
 
 @app.route('/start')
 def start():
-    #response = "<br /><a href=\"%s\">Start</a>" % url_for('matchpartner')
-    return render_template('start.html')
+    user = _data.DataLayer().user_info(session['uid'])
+    user.name = unicode(user.name, 'utf-8')
+    token = _data.DataLayer().user_token(session['uid'])
+    user.avatar = bong.user_avator(uid=token.uid, access_token=token.access_token)
+    return render_template('start.html', user=user)
 
 @app.route('/matchpartner')
 def matchpartner():
@@ -167,21 +170,12 @@ def mystory():
         otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
     except BongAPIError:
          otherInfo = _entity.UserInfo()
-    try:
-        myinfo = _data.DataLayer().user_info(session['uid'])
-        myinfo.name = unicode(myinfo.name, 'utf-8')
-        myToken = _data.DataLayer().user_token(myinfo.uid)
-        myToken = _tryRefreshToken(myToken)
-        session['token'] = myToken.access_token
-        session['uid'] = myToken.uid
-        myinfo.avatar = bong.user_avator(uid=myinfo.uid, access_token=myToken.access_token)
-    except BongAPIError:
-        oauth_return_url = url_for('oauth_return', _external=True)
-        auth_url = bong.build_oauth_url(oauth_return_url)
-        return redirect(auth_url)
+    
+    myinfo = _data.DataLayer().user_info(session['uid'])
+    myinfo.name = unicode(myinfo.name, 'utf-8')
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
-    return render_template('mystory.html', team=team,canfinish=canfinish, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo, myinfo))
+    return render_template('mystory.html', team=team,canfinish=canfinish, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo))
 
 @app.route("/finish")
 def finish():
@@ -189,11 +183,13 @@ def finish():
     _data.DataLayer().finish(partnerinfo.team_id)
     return render_template('nextaction.html')
 
-@app.route("/reject")
-def reject():
+@app.route("/change")
+def change():
     partnerinfo = _data.DataLayer().partner_info(session['uid'])
-    _data.DataLayer().reject(partnerinfo.team_id, session['uid'])
-    return render_template('nextaction.html')
+    if partnerinfo is not None:
+        _data.DataLayer().reject(partnerinfo.team_id, session['uid'])
+
+    return redirect(url_for('mystory'))
 
 @app.route("/info")
 def show_info():
@@ -222,6 +218,7 @@ def show_dayrun(page=0):
         response += u' run: %s 米</br>' % running_data
     return response
 
+'''
 @app.route("/syncteam/")
 def syncteam():
     token = _data.DataLayer().user_token(session['uid'])
@@ -235,6 +232,7 @@ def syncteam():
     running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
     _data.DataLayer().save_activity(token.uid, 5, daylist, running_data)
     return redirect(url_for('mystory'))
+'''
 
 app.secret_key = _keys.secret_key
 
