@@ -175,7 +175,7 @@ def mystory():
     myinfo.name = unicode(myinfo.name, 'utf-8')
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
-    return render_template('mystory.html', team=team,canfinish=canfinish, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo))
+    return render_template('mystory.html', team=team,canfinish=canfinish, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo,))
 
 @app.route("/finish")
 def finish():
