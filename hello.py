@@ -222,7 +222,7 @@ def show_dayrun(page=0):
                 token = _tryRefreshToken(token, True)
             except:
                 response += '%s refresh_token error' % uid
-                
+
             response += '%s cannot refresh data' % uid
     return response
 
