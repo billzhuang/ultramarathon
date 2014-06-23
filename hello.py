@@ -140,6 +140,11 @@ def matchpartner():
 
 @app.route('/deactive')
 def deactive():
+    '''clear my partner'''
+    partnerinfo = _data.DataLayer().partner_info(session['uid'])
+    if partnerinfo is not None:
+        _data.DataLayer().reject(partnerinfo.team_id, session['uid'])
+
     user = _data.DataLayer().user_info(session['uid'])
     user.isactive = 0L
     _data.DataLayer().enable_disable_user(user)
