@@ -218,8 +218,8 @@ def show_dayrun(page=0):
             fivedayago = (datetime.now() - timedelta(days=2)).strftime('%Y%m%d')
             fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
             daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(3)]
-            running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
-            _data.DataLayer().save_activity(uid, 5, daylist, running_data)
+            running_data = bong.bongday_running_list(fivedayago, 3, uid=token.uid, access_token=token.access_token)
+            _data.DataLayer().save_activity(uid, 3, daylist, running_data)
             response += u' run: %s 米</br>' % running_data
         except BongAPIError:
             try:
