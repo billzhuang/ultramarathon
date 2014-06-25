@@ -231,7 +231,8 @@ def add_msg():
 
 @app.route('/dream')
 def dream():
-    return "谁是我的梦中跑友？新功能25号晚10点上线"
+    _data.DataLayer().create_visit('dream', session['uid'])
+    return render_template('dream.html')
 
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):
