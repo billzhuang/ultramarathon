@@ -231,8 +231,47 @@ def add_msg():
 
 @app.route('/dream')
 def dream():
-    _data.DataLayer().create_visit('dream', session['uid'])
-    return render_template('dream.html')
+    if 'times' not in session:
+        session['times'] = 1
+    else:
+        session['times'] = int(session['times']) + 1
+
+    if int(session['times'] >= 6):
+        session['times'] = 0
+        _data.DataLayer().create_visit('dream', session['uid'])
+        return redirect(url_for('mystory'))
+
+    lastdreamtime = _data.DataLayer().check_dream(session['uid'])
+    canAccess = False
+
+    if lastdreamtime is None:
+        canAccess = True
+    else:
+        cTime = datetime.now().replace(minute=0, second=0, microsecond=0)
+        lTime = lastdreamtime.replace(minute=0, second=0, microsecond=0)
+
+        if cTime - lTime >= timedelta(minutes=30):
+            canAccess = True
+
+    if canAccess:
+        userInfo = _data.DataLayer().user_info(session['uid'])
+        dreaminfo = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
+        try:
+            otherInfo = _data.DataLayer().user_info(dreaminfo.uid)
+            otherInfo.name = unicode(otherInfo.name, 'utf-8')
+            otherToken = _data.DataLayer().user_token(otherInfo.uid)
+            otherToken = _tryRefreshToken(otherToken)
+            otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
+        except BongAPIError:
+            '''no avator'''
+
+    return render_template('dream.html', otherInfo=otherInfo)
+
+@app.route("/like/<uid>/<en>")
+def show_dayrun(uid=None, en=None):
+    if uid is not None:
+        _data.DataLayer().create_like(session['uid'], uid, en)
+    return redirect(url_for('dream'))
 
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):

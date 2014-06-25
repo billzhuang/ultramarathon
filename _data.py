@@ -426,3 +426,63 @@ class DataLayer(object):
 
 		c.close()
 		self.db.close()
+
+
+	def load_dream(self, uid, gender):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select uid from bong.member m
+		where uid != %s and gender != %s
+		and uid not in
+		(
+		select v.touid from bong.vote v
+		where v.fromuid = %s
+		)
+		ORDER BY RAND()
+		limit 1
+		''', (uid, gender, uid))
+
+		row = c.fetchone()
+		c.close()
+		self.db.close()
+
+		if row is None:
+			return None
+
+		return row[0]
+
+	def check_dream(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select p.insertdate from bong.pagevisit p
+		where p.pagename='dream' and p.uid=%s
+		order by p.id desc
+		limit 1
+		'''
+		, uid)
+
+		row = c.fetchone()
+		c.close()
+		self.db.close()
+
+		if row is None:
+			return None
+
+		return row[0]
+
+	def create_like(self, fromuid, touid, like):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		insert into bong.vote
+		(fromuid, touid, like, insertdate) 
+		values(%s, %s, %s, now())
+		''', (fromid, touid, like))
+
+		c.close()
+		self.db.close()

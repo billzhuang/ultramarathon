@@ -1,3 +1,19 @@
-谁是我的梦中跑友？新功能25号晚10点上线
-</br></br></br></br>
-<a href="{{ url_for('mystory') }}">返回</a>
+</br>
+</br>
+</br>
+</br>
+<img src="data:image/png;base64,{{ otherInfo.avatar|safe }}" alt="竟然没有头像" />
+{{ otherInfo.name }}，
+{% if otherInfo.gender == '2' %}
+妹子
+{% else %}
+汉子
+{% endif %}
+一枚
+</br>
+</br>
+</br>
+</br>
+<a href="/like/{{ otherInfo.uid }}/1">好喜欢啊</a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="/like/{{ otherInfo.uid }}/0">呵呵</a>
