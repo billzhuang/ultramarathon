@@ -206,15 +206,15 @@ def show_info():
         (img, profile['value']['name'])
     return response
 
-@app.route("/msg")
-def msg():
+@app.route("/show_msg")
+def show_msg():
     partnerinfo = _data.DataLayer().partner_info(session['uid'])
     msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
     for msg in msgs:
         msg.name = unicode(msg.name, 'utf-8')
         msg.content = unicode(msg.content, 'utf-8')
 
-    return render_template('msg.himl', msgs = msgs, team_id=partnerinfo.team_id, uid = session['uid'])
+    return render_template('msg.html', msgs = msgs, team_id=partnerinfo.team_id, uid = session['uid'])
 
 @app.route('/add_msg', methods=['POST'])
 def add_msg():
