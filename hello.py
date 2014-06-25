@@ -249,7 +249,7 @@ def dream():
         canAccess = True
     else:
         cTime = datetime.now().replace(minute=0, second=0, microsecond=0)
-        lTime = lastdreamtime.replace(minute=0, second=0, microsecond=0)
+        lTime = datetime.strptime(lastdreamtime, '%Y-%m-%d %H:%M:%S').replace(minute=0, second=0, microsecond=0)
 
         if cTime - lTime >= timedelta(minutes=30):
             canAccess = True
@@ -258,9 +258,9 @@ def dream():
 
     if canAccess:
         userInfo = _data.DataLayer().user_info(session['uid'])
-        dreaminfo = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
+        dream_uid = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
         try:
-            otherInfo = _data.DataLayer().user_info(dreaminfo.uid)
+            otherInfo = _data.DataLayer().user_info(dream_uid)
             otherInfo.name = unicode(otherInfo.name, 'utf-8')
             otherToken = _data.DataLayer().user_token(otherInfo.uid)
             otherToken = _tryRefreshToken(otherToken)
@@ -271,7 +271,7 @@ def dream():
     return render_template('dream.html', otherInfo=otherInfo)
 
 @app.route("/like/<uid>/<en>")
-def show_dayrun(uid=None, en=None):
+def hello(uid=None, en=None):
     if uid is not None:
         _data.DataLayer().create_like(session['uid'], uid, en)
     return redirect(url_for('dream'))

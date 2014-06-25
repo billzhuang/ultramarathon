@@ -474,15 +474,15 @@ class DataLayer(object):
 
 		return row[0]
 
-	def create_like(self, fromuid, touid, like):
+	def create_like(self, fromuid, touid, up):
 		self.reinitdb()
 		c = self.db.cursor()
 		c.execute(
 		'''
 		insert into bong.vote
-		(fromuid, touid, like, insertdate) 
-		values(%s, %s, %s, now())
-		''', (fromid, touid, like))
+		(fromuid, touid, up) 
+		values(%s, %s, %s)
+		''', (fromuid, touid, up))
 
 		c.close()
 		self.db.close()
