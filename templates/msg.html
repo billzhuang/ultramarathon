@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+  <form action="{{ url_for('add_msg') }}" method=post class=add-entry>
+    <dl>
+      <dt>对TA说点啥:
+      <dd><input type='text' size=50 id='content' />
+      <dt>Text:
+      <dd><input type='hidden' id='uid' value={{ uid }} />
+      <dd><input type='hidden' id='team_id' value={{ team_id }} />
+      <dd><input type=submit value='发布'>
+    </dl>
+  </form>
+  {% for msg in msgs %}
+    {{ msg.name }} 在 {{msg.insertdate} 说：{{msg.content}}}，
+  {% endfor %}
+  
+{% endblock %}

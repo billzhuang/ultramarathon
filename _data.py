@@ -376,3 +376,40 @@ class DataLayer(object):
 		end = (page + 1) * 15
 
 		return list[start:end]
+
+	def load_msg(self, team_id):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.name, ms.content, ms.insertdate from bong.team_msg ms
+		join bong.member m
+			on ms.send_uid = m.uid
+		where ms.team_id = %s
+		order by ms.id desc 
+		limit 0, 5
+		''', team_id)
+
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		msgs = []
+
+		for row in rows:
+			msgs.append(_entity.TeamMsg(row[0], row[1], row[2]))
+
+		return msgs
+
+	def create_msg(self, team_id, uid, content):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		insert into bong.activity
+		(team_id, send_uid, content, insertdate) 
+		values(%s, %s, %s, now())
+		''', (team_id, uid, content))
+
+		c.close()
+		self.db.close()

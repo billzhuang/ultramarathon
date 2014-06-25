@@ -206,6 +206,25 @@ def show_info():
         (img, profile['value']['name'])
     return response
 
+@app.route("/msg")
+def msg():
+    partnerinfo = _data.DataLayer().partner_info(session['uid'])
+    msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
+    for msg in msgs:
+        msg.name = unicode(msg.name, 'utf-8')
+        msg.content = unicode(msg.content, 'utf-8')
+
+    return render_template('msg.himl', msgs = msgs, team_id=partnerinfo.team_id, uid = session['uid'])
+
+@app.route('/add_msg', methods=['POST'])
+def add_msg():
+    if not session.get('uid'):
+        abort(401)
+
+    _data.DataLayer().create_msg(request.form['team_id'], request.form['u_id'], request.form['content'])
+
+    return redirect(url_for('msg'))
+
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):
     todo = _data.DataLayer().batch_uids(int(page))
@@ -229,22 +248,6 @@ def show_dayrun(page=0):
 
             response += '%s cannot refresh data' % uid
     return response
-
-'''
-@app.route("/syncteam/")
-def syncteam():
-    token = _data.DataLayer().user_token(session['uid'])
-    newtoken = _tryRefreshToken(token)
-    if newtoken.access_token != token.access_token:
-        _data.DataLayer().update_token(newtoken)
-    token = newtoken
-    fivedayago = (datetime.now() - timedelta(days=4)).strftime('%Y%m%d')
-    fivedayagodate = datetime.strptime(fivedayago, '%Y%m%d')
-    daylist = [(fivedayagodate + timedelta(days=x)).strftime('%Y%m%d') for x in range(5)]
-    running_data = bong.bongday_running_list(fivedayago, 5, uid=token.uid, access_token=token.access_token)
-    _data.DataLayer().save_activity(token.uid, 5, daylist, running_data)
-    return redirect(url_for('mystory'))
-'''
 
 app.secret_key = _keys.secret_key
 
