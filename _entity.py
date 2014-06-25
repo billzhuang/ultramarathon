@@ -38,7 +38,7 @@ class TeamSummary(object):
 		self.sumdistance = sumdistance
 
 class TeamMsg(object):
-	def __init__(self, send_uid, content, insertdate):
-		self.send_uid = send_uid
+	def __init__(self, name, content, insertdate):
+		self.name = send_uid
 		self.content = content
 		self.insertdate = insertdate
