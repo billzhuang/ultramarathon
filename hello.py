@@ -179,7 +179,14 @@ def mystory():
     myinfo.name = unicode(myinfo.name, 'utf-8')
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
-    return render_template('mystory.html', team=team,canfinish=canfinish, showsummary=showsummary, teamsummary=teamsummary, entries=(otherInfo,))
+    return render_template('mystory.html'
+        , team=team,canfinish=canfinish
+        , showsummary=showsummary
+        , teamsummary=teamsummary
+        , entries=(otherInfo,)
+        , msgs = msgs
+        , team_id=partnerinfo.team_id
+        , uid = session['uid'])
 
 @app.route("/finish")
 def finish():
@@ -223,7 +230,7 @@ def add_msg():
 
     _data.DataLayer().create_msg(request.form['team_id'], request.form['uid'], request.form['content'])
 
-    return redirect(url_for('show_msg'))
+    return redirect(url_for('mystory'))
 
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):

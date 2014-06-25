@@ -23,8 +23,20 @@
   {% else %}
   <a href="{{ url_for('change') }}">换一个人吧</a>
   {% endif %}
-  </br></br></br></br></br></br>
-  </br></br></br></br></br></br>
+  </br></br></br>
+  <form action="{{ url_for('add_msg') }}" method="post">
+    <dl>
+      <dt>对TA说点啥:
+      <input type='text' size=50 id='content' name='content' />
+      <input type='hidden' id='uid' name='uid' value="{{ uid }}" />
+      <input type='hidden' id='team_id' name='team_id' value="{{ team_id }}" />
+      <input type="submit" value='发布'>
+    </dl>
+  </form>
+  {% for msg in msgs %}
+    {{ msg.name }} 在 {{msg.insertdate}} 说：{{msg.content}}，</br>
+  {% endfor %}
+  </br></br></br>
   <h4>规则：</h4>
   <ul>
     <li>每天两人加起来若不到4公里，本天积累的公里减半</li>
