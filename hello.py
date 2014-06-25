@@ -216,14 +216,14 @@ def show_msg():
 
     return render_template('msg.html', msgs = msgs, team_id=partnerinfo.team_id, uid = session['uid'])
 
-@app.route('/add_msg', methods=['POST'])
+@app.route('/add_msg', methods=['GET','POST'])
 def add_msg():
     if not session.get('uid'):
         abort(401)
 
-    _data.DataLayer().create_msg(request.form['team_id'], request.form['u_id'], request.form['content'])
+    _data.DataLayer().create_msg(request.form['team_id'], request.form['uid'], request.form['content'])
 
-    return redirect(url_for('msg'))
+    return redirect(url_for('show_msg'))
 
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):
