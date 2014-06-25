@@ -413,3 +413,16 @@ class DataLayer(object):
 
 		c.close()
 		self.db.close()
+
+	def create_visit(self, pagename, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		insert into bong.pagevisit
+		(pagename, uid, insertdate) 
+		values(%s, %s, now())
+		''', (pagename, uid))
+
+		c.close()
+		self.db.close()

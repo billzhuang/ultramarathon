@@ -153,6 +153,7 @@ def deactive():
 
 @app.route('/mystory')
 def mystory():
+    _data.DataLayer().create_visit('mystory', session['uid'])
     partnerinfo = _data.DataLayer().partner_info(session['uid'])
     if partnerinfo is None:
         return redirect(url_for('matchpartner'))
