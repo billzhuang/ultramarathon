@@ -232,16 +232,6 @@ def add_msg():
 @app.route('/dream')
 def dream():
     _data.DataLayer().create_visit('trydream', session['uid'])
-    if 'times' not in session:
-        session['times'] = 1
-    else:
-        session['times'] = int(session['times']) + 1
-
-    if int(session['times'] >= 6):
-        session['times'] = 0
-        _data.DataLayer().create_visit('dream', session['uid'])
-        return redirect(url_for('mystory'))
-
     lastdreamtime = _data.DataLayer().check_dream(session['uid'])
     canAccess = False
 
@@ -253,12 +243,24 @@ def dream():
 
         if cTime - lTime >= timedelta(minutes=30):
             canAccess = True
+            if 'times' not in session:
+                session['times'] = 1
+            else:
+                session['times'] = int(session['times']) + 1
+
+            if int(session['times'] >= 6):
+                session['times'] = 0
+                _data.DataLayer().create_visit('dream', session['uid'])
+                return redirect(url_for('mystory'))
         else:
             return "只能每半个小时做一次梦哦，待会再来吧"
 
     if canAccess:
         userInfo = _data.DataLayer().user_info(session['uid'])
         dream_uid = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
+
+        if dream_uid is None:
+            return "你看的太多了，要休息一下了，注意身体啊！"
         try:
             otherInfo = _data.DataLayer().user_info(dream_uid)
             otherInfo.name = unicode(otherInfo.name, 'utf-8')
