@@ -179,7 +179,7 @@ def mystory():
     myinfo.name = unicode(myinfo.name, 'utf-8')
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
-    
+
     msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
     for msg in msgs:
         msg.name = unicode(msg.name, 'utf-8')
@@ -218,16 +218,6 @@ def show_info():
     response += '<img src="data:image/png;base64,%s" alt="%s" />' %\
         (img, profile['value']['name'])
     return response
-
-@app.route("/show_msg")
-def show_msg():
-    partnerinfo = _data.DataLayer().partner_info(session['uid'])
-    msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
-    for msg in msgs:
-        msg.name = unicode(msg.name, 'utf-8')
-        msg.content = unicode(msg.content, 'utf-8')
-
-    return render_template('msg.html', msgs = msgs, team_id=partnerinfo.team_id, uid = session['uid'])
 
 @app.route('/add_msg', methods=['GET','POST'])
 def add_msg():
