@@ -231,6 +231,7 @@ def add_msg():
 
 @app.route('/dream')
 def dream():
+    _data.DataLayer().create_visit('trydream', session['uid'])
     if 'times' not in session:
         session['times'] = 1
     else:
@@ -252,6 +253,8 @@ def dream():
 
         if cTime - lTime >= timedelta(minutes=30):
             canAccess = True
+        else:
+            return "只能每半个小时做一次梦哦，待会再来吧"
 
     if canAccess:
         userInfo = _data.DataLayer().user_info(session['uid'])
