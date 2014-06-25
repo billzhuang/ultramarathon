@@ -3,13 +3,14 @@
   <form action="{{ url_for('add_msg') }}" method="post">
     <dl>
       <dt>对TA说点啥:
-      <dd><input type='text' size=50 id='content' name='content' />
-      <dd><input type='hidden' id='uid' name='uid' value="{{ uid }}" />
-      <dd><input type='hidden' id='team_id' name='team_id' value="{{ team_id }}" /><input type="submit" value='发布'>
+      <input type='text' size=50 id='content' name='content' />
+      <input type='hidden' id='uid' name='uid' value="{{ uid }}" />
+      <input type='hidden' id='team_id' name='team_id' value="{{ team_id }}" />
+      <input type="submit" value='发布'>
     </dl>
   </form>
   {% for msg in msgs %}
-    {{ msg.name }} 在 {{msg.insertdate}} 说：{{msg.content}}，
+    {{ msg.name }} 在 {{msg.insertdate}} 说：{{msg.content}}，</br>
   {% endfor %}
   
 {% endblock %}

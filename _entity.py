@@ -39,6 +39,6 @@ class TeamSummary(object):
 
 class TeamMsg(object):
 	def __init__(self, name, content, insertdate):
-		self.name = send_uid
+		self.name = name
 		self.content = content
 		self.insertdate = insertdate
