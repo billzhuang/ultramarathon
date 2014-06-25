@@ -179,6 +179,12 @@ def mystory():
     myinfo.name = unicode(myinfo.name, 'utf-8')
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
+    
+    msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
+    for msg in msgs:
+        msg.name = unicode(msg.name, 'utf-8')
+        msg.content = unicode(msg.content, 'utf-8')
+
     return render_template('mystory.html'
         , team=team,canfinish=canfinish
         , showsummary=showsummary
