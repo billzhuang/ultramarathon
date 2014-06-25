@@ -27,7 +27,7 @@
   <form action="{{ url_for('add_msg') }}" method="post">
     <dl>
       <dt>对TA说点啥:
-      <input type='text' size=50 id='content' name='content' />
+      <input type='text' size='40' maxlength='50' id='content' name='content' />
       <input type='hidden' id='uid' name='uid' value="{{ uid }}" />
       <input type='hidden' id='team_id' name='team_id' value="{{ team_id }}" />
       <input type="submit" value='发布'>
