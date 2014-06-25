@@ -406,7 +406,7 @@ class DataLayer(object):
 		c = self.db.cursor()
 		c.execute(
 		'''
-		insert into bong.activity
+		insert into bong.team_msg
 		(team_id, send_uid, content, insertdate) 
 		values(%s, %s, %s, now())
 		''', (team_id, uid, content))
