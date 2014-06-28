@@ -260,7 +260,7 @@ def dream():
         dream_uid = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
 
         if dream_uid is None:
-            return "你看的太多了，要休息一下了，注意身体啊！"
+            return "所有的异性都已经被我看完了，待会再来看看可能才会有新人喔。"
         try:
             otherInfo = _data.DataLayer().user_info(dream_uid)
             otherInfo.name = unicode(otherInfo.name, 'utf-8')
