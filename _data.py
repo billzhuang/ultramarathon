@@ -185,7 +185,7 @@ class DataLayer(object):
 		select distinct l3.uid from bong.team_member_lnk l2
 		join bong.team_member_lnk l3
 			on l2.team_id = l3.team_id and l3.uid != l2.uid
-		where l2.uid = %s and l2.status='rejected' and TIMESTAMPDIFF(HOUR,l2.updatedate ,now()) <  48
+		where l2.uid = %s and l2.status='rejected' and TIMESTAMPDIFF(HOUR,l2.updatedate ,now()) <  96
 		)
 		and m.uid != %s
 		and m.isactive =1
