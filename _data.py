@@ -511,3 +511,70 @@ class DataLayer(object):
 			msgs.append(_entity.Fans(row[0], row[1]))
 
 		return msgs
+
+	def ask_question(self, fromuid, touid, content):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		insert into bong.msg
+		(parent_id, fromuid, touid, content)
+		values(-1, %s, %s)
+		''', (fromuid, touid, content))
+
+		c.close()
+		self.db.close()
+
+	def reply_question(self, pid, fromuid, touid, content):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		update bong.msg
+		set isread =1, updatedate=now()
+		where (parent_id=%s or id=%s) and isread=0;
+
+		insert into bong.msg
+		(parent_id, fromuid, touid, content)
+		values(%s, %s, %s, %s)
+		''', (pid, pid, pid, fromuid, touid, content))
+
+		c.close()
+		self.db.close()
+
+	def pick_question(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.id from bong.msg m
+		where m.parent_id = -1 and m.fromuid != %s and m.touid = -1
+		ORDER BY RAND()
+		''', (uid,))
+
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		for row in rows:
+			if self.confirm_question(uid, row[0]):
+				return
+
+	def confirm_question(self, uid, q_id):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		update bong.msg
+		set touid=%s, updatedate = now()
+		where id = %s and isread=0 and touid = -1
+		''', (uid, qid))
+
+		rowcount = c.rowcount
+		c.close()
+		self.db.close()
+
+		if rowcount == -1:
+			return False
+
+		return True
