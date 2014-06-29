@@ -217,6 +217,7 @@ def change():
 @app.route("/info/<uid>")
 def show_info(uid=None):
     if uid is not None:
+        _data.DataLayer().create_visit('info', session['uid'])
         userInfo = _data.DataLayer().user_info(uid)
         userInfo.name = unicode(userInfo.name, 'utf-8')
         token = _data.DataLayer().user_token(uid)
@@ -285,13 +286,6 @@ def hello(uid=None, en=None):
     if uid is not None:
         _data.DataLayer().create_like(session['uid'], uid, en)
     return redirect(url_for('dream'))
-
-@app.route("/likeme")
-def likeme():
-    fans = _data.DataLayer().my_fans(session['uid'])
-    for item in fans:
-        item.name = unicode(item.name, 'utf-8')
-    return render_template('fans.html', fans=fans)
 
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):
