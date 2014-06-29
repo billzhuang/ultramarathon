@@ -217,7 +217,7 @@ def show_info(uid=None):
         token = _data.DataLayer().user_token(uid)
         try:
             img = bong.user_avator(uid=uid, access_token=token.access_token)
-            userInfo.avator = img
+            userInfo.avatar = img
         except BongAPIError:
             '''no avator'''
 
