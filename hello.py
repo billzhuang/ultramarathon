@@ -211,12 +211,12 @@ def change():
 
 @app.route("/info/<uid>")
 def show_info(uid=None):
-    if uid is Not None:
+    if uid is not None:
         userInfo = _data.DataLayer().user_info(uid)
         userInfo.name = unicode(userInfo.name, 'utf-8')
         token = _data.DataLayer().user_token(uid)
         try:
-            img = bong.user_avator(uid, access_token=token.access_token)
+            img = bong.user_avator(uid=uid, access_token=token.access_token)
             userInfo.avator = img
         except BongAPIError:
             '''no avator'''
@@ -284,6 +284,8 @@ def hello(uid=None, en=None):
 @app.route("/likeme")
 def likeme():
     fans = _data.DataLayer().my_fans(session['uid'])
+    for item in fans:
+        item.name = unicode(item.name, 'utf-8')
     return render_template('fans.html', fans=fans)
 
 @app.route("/dayrun/<page>")
