@@ -204,9 +204,9 @@ class BongClient(object):
                         profile['value']['birthday'],
                         params['uid'])
 
-    def user_avator(self, **params):
+    def user_avatar(self, **params):
         if 'access_token' not in params or 'uid' not in params:
-            raise BongAPIError('failed to get user avator, cuz lack of token and uid')
+            raise BongAPIError('failed to get user avatar, cuz lack of token and uid')
 
         img = self.get('1/userInfo/avatar/%s' % params['uid'], access_token=params['access_token'])
 

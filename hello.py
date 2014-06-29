@@ -121,7 +121,7 @@ def start():
     user = _data.DataLayer().user_info(session['uid'])
     user.name = unicode(user.name, 'utf-8')
     token = _data.DataLayer().user_token(session['uid'])
-    user.avatar = bong.user_avator(uid=token.uid, access_token=token.access_token)
+    user.avatar = bong.user_avatar(uid=token.uid, access_token=token.access_token)
     return render_template('start.html', user=user)
 
 @app.route('/matchpartner')
@@ -173,9 +173,9 @@ def mystory():
         otherInfo.name = unicode(otherInfo.name, 'utf-8')
         otherToken = _data.DataLayer().user_token(otherInfo.uid)
         otherToken = _tryRefreshToken(otherToken)
-        otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
+        otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
     except BongAPIError:
-        '''no avator'''
+        '''no avatar'''
     myinfo = _data.DataLayer().user_info(session['uid'])
     myinfo.name = unicode(myinfo.name, 'utf-8')
 
@@ -216,10 +216,10 @@ def show_info(uid=None):
         userInfo.name = unicode(userInfo.name, 'utf-8')
         token = _data.DataLayer().user_token(uid)
         try:
-            img = bong.user_avator(uid=uid, access_token=token.access_token)
+            img = bong.user_avatar(uid=uid, access_token=token.access_token)
             userInfo.avatar = img
         except BongAPIError:
-            '''no avator'''
+            '''no avatar'''
 
         return render_template('info.html', userInfo=userInfo)
 
@@ -269,9 +269,9 @@ def dream():
             otherInfo.name = unicode(otherInfo.name, 'utf-8')
             otherToken = _data.DataLayer().user_token(otherInfo.uid)
             otherToken = _tryRefreshToken(otherToken)
-            otherInfo.avatar = bong.user_avator(uid=otherInfo.uid, access_token=otherToken.access_token)
+            otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
         except BongAPIError:
-            '''no avator'''
+            '''no avatar'''
 
     return render_template('dream.html', otherInfo=otherInfo)
 
