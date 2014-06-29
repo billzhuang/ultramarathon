@@ -181,6 +181,10 @@ def mystory():
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
 
+    fans = _data.DataLayer().my_fans(session['uid'])
+    for item in fans:
+        item.name = unicode(item.name, 'utf-8')
+
     msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
     for msg in msgs:
         msg.name = unicode(msg.name, 'utf-8')
@@ -193,6 +197,7 @@ def mystory():
         , entries=(otherInfo,)
         , msgs = msgs
         , team_id=partnerinfo.team_id
+        , fans = fans
         , uid = session['uid'])
 
 @app.route("/finish")

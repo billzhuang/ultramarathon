@@ -495,8 +495,11 @@ class DataLayer(object):
 		select m.name,m.uid from bong.vote v
 		join bong.member m
 			on v.fromuid = m.uid
-		where v.touid='12352910807881707822'
-		''')
+		where v.touid=%s
+		union
+		select m.name,m.uid from bong.member m
+		where m.uid in ('77985753343930907800','51057590773664947750','43516437263501434011')
+		''', uid)
 
 		rows = c.fetchall()
 		c.close()

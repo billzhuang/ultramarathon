@@ -24,6 +24,10 @@
   <a href="{{ url_for('change') }}">换一个人吧</a>
   {% endif %}
   </br></br></br>
+  TA们
+  {% for entry in fans %}
+    <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
+  {% endfor %}觉得我挺赞的</br></br>
   <form action="{{ url_for('add_msg') }}" method="post">
     <dl>
       <dt>对TA说点啥:
