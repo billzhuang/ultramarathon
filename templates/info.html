@@ -1,0 +1,21 @@
+<h4>{{ userInfo.name }}</h4>
+</br>
+</br>
+</br>
+<img src="data:image/png;base64,{{ userInfo.avatar|safe }}" alt="竟然没有头像" /></br>
+{% if userInfo.gender == '2' %}
+妹子
+{% else %}
+汉子
+{% endif %}
+</br>
+</br>
+</br>
+</br>
+<input type="button" value="返回" onclick="goBack()">
+<script>
+function goBack()
+{
+window.history.back()
+}
+</script>

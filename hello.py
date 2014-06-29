@@ -209,16 +209,19 @@ def change():
 
     return redirect(url_for('mystory'))
 
-@app.route("/info")
-def show_info():
-    token = _data.DataLayer().user_token(session['uid'])
-    profile = bong.get('/1/userInfo/%s' % session['uid'], access_token=token.access_token)
-    img = bong.user_avator(uid=session['uid'], access_token=token.access_token)
-    response = 'User ID: %s<br />First day using bong: %s' % \
-        (profile['value']['name'], profile['value']['birthday'])
-    response += '<img src="data:image/png;base64,%s" alt="%s" />' %\
-        (img, profile['value']['name'])
-    return response
+@app.route("/info/<uid>")
+def show_info(uid=None):
+    if uid is Not None:
+        userInfo = _data.DataLayer().user_info(uid)
+        userInfo.name = unicode(userInfo.name, 'utf-8')
+        token = _data.DataLayer().user_token(uid)
+        try:
+            img = bong.user_avator(uid, access_token=token.access_token)
+            userInfo.avator = img
+        except BongAPIError:
+            '''no avator'''
+
+        return render_template('info.html', userInfo=userInfo)
 
 @app.route('/add_msg', methods=['GET','POST'])
 def add_msg():
@@ -277,6 +280,11 @@ def hello(uid=None, en=None):
     if uid is not None:
         _data.DataLayer().create_like(session['uid'], uid, en)
     return redirect(url_for('dream'))
+
+@app.route("/likeme")
+def likeme():
+    fans = _data.DataLayer().my_fans(session['uid'])
+    return render_template('fans.html', fans=fans)
 
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):

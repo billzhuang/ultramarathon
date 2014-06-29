@@ -486,3 +486,25 @@ class DataLayer(object):
 
 		c.close()
 		self.db.close()
+
+	def my_fans(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.name,m.uid from bong.vote v
+		join bong.member m
+			on v.fromuid = m.uid
+		where v.touid='12352910807881707822'
+		''')
+
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		msgs = []
+
+		for row in rows:
+			msgs.append(_entity.Fans(row[0], row[1]))
+
+		return msgs

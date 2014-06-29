@@ -42,3 +42,8 @@ class TeamMsg(object):
 		self.name = name
 		self.content = content
 		self.insertdate = insertdate
+
+class Fans(object):
+	def __init__(self, name, uid):
+		self.name = name
+		self.uid = uid
