@@ -623,6 +623,7 @@ class DataLayer(object):
 		select m.fromuid, m.content, m.insertdate from bong.msg m
 		where m.id = %s or m.parent_id = %s
 		order by m.id desc
+		limit 10
 		''', (q_id, q_id))
 
 		rows = c.fetchall()
