@@ -23,7 +23,16 @@
   {% else %}
   <a href="{{ url_for('change') }}">换一个人吧</a>
   {% endif %}
-  </br></br></br>
+  </br></br>
+  {% if question_no > 0 %}
+  <a href="{{ url_for('load_question') }}">有{{question_no}}条求助，</a>&nbsp;&nbsp;
+  {% endif %}
+  {% if answer_no > 0 %}
+  <a href="{{ url_for('load_question') }}">有{{answer_no}}条新回复</a>
+  {% endif %}
+  </br>
+  <a href="{{ url_for('ask') }}">我要求助</a>
+  </br>
   {% for entry in fans %}
     <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
   {% endfor %}觉得我挺赞的!</br>

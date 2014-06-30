@@ -181,6 +181,9 @@ def mystory():
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
 
+    question_no = _data.DataLayer().question_no(session['uid'])
+    answer_no = _data.DataLayer().answer_no(session['uid'])
+
     fans = _data.DataLayer().my_fans(session['uid'])
     for item in fans:
         item.name = unicode(item.name, 'utf-8')
@@ -198,6 +201,8 @@ def mystory():
         , msgs = msgs
         , team_id=partnerinfo.team_id
         , fans = fans
+        , question_no = question_no
+        , answer_no = answer_no
         , uid = session['uid'])
 
 @app.route("/finish")
@@ -289,12 +294,8 @@ def hello(uid=None, en=None):
 
 @app.route("/ask")
 def ask():
-    question_no = _data.DataLayer().question_no(session['uid'])
-    answer_no = _data.DataLayer().answer_no(session['uid'])
     return render_template('ask.html'
-                    , uid=session['uid']
-                    , question_no=question_no
-                    , answer_no = answer_no)
+                    , uid=session['uid'])
 
 @app.route('/add_question', methods=['POST'])
 def add_question():
