@@ -294,6 +294,7 @@ def hello(uid=None, en=None):
 
 @app.route("/ask")
 def ask():
+    _data.DataLayer().create_visit('ask', session['uid'])
     return render_template('ask.html'
                     , uid=session['uid'])
 
@@ -308,6 +309,7 @@ def add_question():
 
 @app.route("/load_question")
 def load_question():
+    _data.DataLayer().create_visit('answer', session['uid'])
     q_id = _data.DataLayer().load_question(session['uid'])
     if q_id is None:
         q_id = _data.DataLayer().pick_question(session['uid'])
