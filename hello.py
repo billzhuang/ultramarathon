@@ -153,6 +153,11 @@ def deactive():
 
 @app.route('/mystory')
 def mystory():
+    if 'uid' not in session:
+        oauth_return_url = url_for('oauth_return', _external=True)
+        auth_url = bong.build_oauth_url(oauth_return_url)
+        return redirect(auth_url)
+        
     _data.DataLayer().create_visit('mystory', session['uid'])
     partnerinfo = _data.DataLayer().partner_info(session['uid'])
     if partnerinfo is None:
