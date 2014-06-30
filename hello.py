@@ -157,7 +157,7 @@ def mystory():
         oauth_return_url = url_for('oauth_return', _external=True)
         auth_url = bong.build_oauth_url(oauth_return_url)
         return redirect(auth_url)
-        
+
     _data.DataLayer().create_visit('mystory', session['uid'])
     partnerinfo = _data.DataLayer().partner_info(session['uid'])
     if partnerinfo is None:
@@ -272,14 +272,14 @@ def dream():
                 _data.DataLayer().create_visit('dream', session['uid'])
                 return redirect(url_for('mystory'))
         else:
-            return "只能每半个小时做一次梦哦，待会再来吧"
+            return render_template('restrict.html')
 
     if canAccess:
         userInfo = _data.DataLayer().user_info(session['uid'])
         dream_uid = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
 
         if dream_uid is None:
-            return "所有的异性都已经被我看完了，待会再来看看可能才会有新人喔。"
+            return render_template('empty.html')
         try:
             otherInfo = _data.DataLayer().user_info(dream_uid)
             otherInfo.name = unicode(otherInfo.name, 'utf-8')
