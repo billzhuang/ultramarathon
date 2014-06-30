@@ -6,7 +6,7 @@
   按照这个速度，还需要<strong>{{teamsummary.leftday}}</strong>天。</br>
   {% endif %}
   {% for entry in entries %}
-    <img src="data:image/png;base64,{{ entry.avatar|safe }}" alt="竟然没有头像" /></br>
+    <img height="100" width="100" src="data:image/png;base64,{{ entry.avatar|safe }}" alt="竟然没有头像" /></br>
     {{ entry.name }}，
     {% if entry.gender == '2' %}
     妹子
