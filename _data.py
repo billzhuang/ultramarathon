@@ -609,7 +609,7 @@ class DataLayer(object):
 		self.db.close()
 
 		if row is not None:
-			if row[1] == '-1':
+			if row[1] == -1L:
 				return row[0]
 			return row[1]
 
