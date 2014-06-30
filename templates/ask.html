@@ -1,7 +1,7 @@
-{% question_no != -1 %}
+{% if question_no > 0 %}
 我有{{question_no}}条求助，
 {% endif %}
-{% answer_no != -1 %}
+{% if answer_no > 0 %}
 我有{{answer_no}}条新回复
 {% endif %}
 </br>
