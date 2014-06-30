@@ -30,7 +30,7 @@
   <a href="{{ url_for('load_question') }}">有{{answer_no}}条新回复</a>
   {% endif %}
   </br></br>
-  <div style="background:#FCEBB6;color:#78C0A8"><a href="{{ url_for('ask') }}">我要求助</a>广大bong友</div>
+  <div style="background:#FCEBB6;color:#78C0A8"><a href="{{ url_for('ask') }}"><strong>我要求助</strong></a>广大bong友</div>
   </br></br>
   {% for entry in fans %}
     <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
