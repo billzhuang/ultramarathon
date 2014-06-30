@@ -289,7 +289,12 @@ def hello(uid=None, en=None):
 
 @app.route("/ask")
 def ask():
-    return render_template('ask.html', uid=session['uid'])
+    question_no = _data.DataLayer().question_no(session['uid'])
+    answer_no = _data.DataLayer().answer_no(session['uid'])
+    return render_template('ask.html'
+                    , uid=session['uid']
+                    , question_no=question_no
+                    , answer_no = answer_no)
 
 @app.route('/add_question', methods=['POST'])
 def add_question():

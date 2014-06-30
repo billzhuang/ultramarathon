@@ -617,9 +617,37 @@ class DataLayer(object):
 		self.db.close()
 
 		list = []
-		print(q_id)
 		for row in rows:
-			print(2)
 			list.append(_entity.Answer(row[0], row[1], row[2]))
 
 		return list
+
+	def question_no(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.id from bong.msg m
+		where m.parent_id = -1 and m.fromuid != %s and m.touid = -1
+		''', (uid,))
+
+		rowcount = c.rowcount
+		c.close()
+		self.db.close()
+
+		return rowcount
+
+	def answer_no(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.id from bong.msg m
+		where m.touid=%s and isread=0
+		''', (uid,))
+
+		rowcount = c.rowcount
+		c.close()
+		self.db.close()
+
+		return rowcount
