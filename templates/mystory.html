@@ -38,6 +38,10 @@
     <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
   {% endfor %}觉得我挺赞的!</br>
   小提示：上传真人头像可以获得更多的赞。</br>
+  {% for msg in msgs %}
+    {{ msg.name }} 在 {{msg.insertdate}} 说：{{msg.content}}</br>
+  {% endfor %}
+  </br>
   <form action="{{ url_for('add_msg') }}" method="post">
     <dl>
       <dt>对TA说点啥:
@@ -47,10 +51,7 @@
       <input type="submit" value='发布'>
     </dl>
   </form>
-  {% for msg in msgs %}
-    {{ msg.name }} 在 {{msg.insertdate}} 说：{{msg.content}}</br>
-  {% endfor %}
-  </br></br></br>
+  </br></br>
   <h4>规则：</h4>
   <ul>
     <li>每天两人加起来若不到4公里，本天积累的公里减半</li>
