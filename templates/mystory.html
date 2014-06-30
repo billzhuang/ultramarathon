@@ -1,10 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
   <h3>{{team.name}}</h3>
-  </br>
   {% if showsummary %}
   开始于{{teamsummary.startdate}}，两个人平均每天跑了{{teamsummary.avgdistance}}米,
-  按照这个速度，还需要<strong>{{teamsummary.leftday}}</strong>天，加油！</br>
+  按照这个速度，还需要<strong>{{teamsummary.leftday}}</strong>天。</br>
   {% endif %}
   {% for entry in entries %}
     <img src="data:image/png;base64,{{ entry.avatar|safe }}" alt="竟然没有头像" /></br>
@@ -23,7 +22,7 @@
   {% else %}
   <a href="{{ url_for('change') }}">换一个人吧</a>
   {% endif %}
-  </br></br>
+  </br>
   {% if question_no > 0 %}
   <a href="{{ url_for('load_question') }}">有{{question_no}}条求助，</a>&nbsp;&nbsp;
   {% endif %}
@@ -31,7 +30,7 @@
   <a href="{{ url_for('load_question') }}">有{{answer_no}}条新回复</a>
   {% endif %}
   </br></br>
-  <a href="{{ url_for('ask') }}">我要求助</a>广大bong友一个问题
+  <div style="background:#FCEBB6;color:#78C0A8"><a href="{{ url_for('ask') }}">我要求助</a>广大bong友</div>
   </br></br>
   {% for entry in fans %}
     <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
