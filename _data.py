@@ -542,6 +542,19 @@ class DataLayer(object):
 		c.close()
 		self.db.close()
 
+	def close_question(self, q_id):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		update bong.msg
+		set isread =1, updatedate=now()
+		where (parent_id=%s or id=%s) and isread=0;
+		''', (q_id, q_id))
+
+		c.close()
+		self.db.close()
+
 	def pick_question(self, uid):
 		self.reinitdb()
 		c = self.db.cursor()

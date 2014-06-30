@@ -338,6 +338,15 @@ def reply_question():
 
     return redirect(url_for('load_question'))
 
+@app.route('/close_question', methods=['POST'])
+def close_question():
+    if not session.get('uid'):
+        abort(401)
+
+    _data.DataLayer().close_question(request.form['q_id'])
+
+    return redirect(url_for('load_question'))
+
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):
     todo = _data.DataLayer().batch_uids(int(page))
