@@ -304,7 +304,7 @@ def add_question():
 
     _data.DataLayer().create_question(request.form['uid'], '-1', request.form['content'])
 
-    return redirect(url_for('mystory'))
+    return render_template('askdone.html'）
 
 @app.route("/load_question")
 def load_question():
