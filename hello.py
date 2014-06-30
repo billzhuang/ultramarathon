@@ -312,7 +312,7 @@ def load_question():
     if q_id is None:
         q_id = _data.DataLayer().pick_question(session['uid'])
         if q_id is None:
-            return render_template('nomsg.html'）
+            return render_template('nomsg.html')
 
     answerlist = _data.DataLayer().load_questionfeed(q_id)
     touid = ''
