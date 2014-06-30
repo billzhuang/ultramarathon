@@ -24,9 +24,11 @@
   {% endif %}
   </br>
   {% if question_no > 0 %}
+  </br>
   <a href="{{ url_for('load_question') }}">有{{question_no}}条求助，</a>&nbsp;&nbsp;
   {% endif %}
   {% if answer_no > 0 %}
+  </br>
   <a href="{{ url_for('load_question') }}">有{{answer_no}}条新回复</a>
   {% endif %}
   </br></br>
