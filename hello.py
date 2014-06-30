@@ -338,7 +338,7 @@ def reply_question():
 
     _data.DataLayer().reply_question(request.form['q_id'], session['uid'], request.form['touid'], request.form['content'])
 
-    return redirect(url_for('load_question'))
+    return render_template('afterreply.html'）
 
 @app.route('/close_question', methods=['POST'])
 def close_question():
