@@ -24,10 +24,10 @@
   <a href="{{ url_for('change') }}">换一个人吧</a>
   {% endif %}
   </br></br></br>
-  TA们
   {% for entry in fans %}
     <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
-  {% endfor %}觉得我挺赞的</br></br>
+  {% endfor %}觉得我挺赞的!</br>
+  小提示：上传真人头像可以获得更多的赞。</br>
   <form action="{{ url_for('add_msg') }}" method="post">
     <dl>
       <dt>对TA说点啥:

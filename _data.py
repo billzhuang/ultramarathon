@@ -570,7 +570,7 @@ class DataLayer(object):
 		update bong.msg
 		set touid=%s, updatedate = now()
 		where id = %s and isread=0 and touid = -1
-		''', (uid, qid))
+		''', (uid, q_id))
 
 		rowcount = c.rowcount
 		c.close()
@@ -586,7 +586,7 @@ class DataLayer(object):
 		c = self.db.cursor()
 		c.execute(
 		'''
-		select m.id from bong.msg m
+		select m.id, m.parent_id from bong.msg m
 		where m.touid=%s and isread=0
 		limit 1
 		''', (uid,))
@@ -596,7 +596,9 @@ class DataLayer(object):
 		self.db.close()
 
 		if row is not None:
+                    if row[1] == '-1':
 			return row[0]
+                    return row[1]
 
 		return None
 
@@ -606,17 +608,18 @@ class DataLayer(object):
 		c.execute(
 		'''
 		select m.fromuid, m.content, m.insertdate from bong.msg m
-		where m.id = '453'
+		where m.id = %s or m.parent_id = %s
 		order by m.id desc
-		''', (q_id,))
+		''', (q_id, q_id))
 
 		rows = c.fetchall()
 		c.close()
 		self.db.close()
 
 		list = []
-
+		print(q_id)
 		for row in rows:
+			print(2)
 			list.append(_entity.Answer(row[0], row[1], row[2]))
 
 		return list
