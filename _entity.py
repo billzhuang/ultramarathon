@@ -47,3 +47,9 @@ class Fans(object):
 	def __init__(self, name, uid):
 		self.name = name
 		self.uid = uid
+
+class Answer(object):
+	def __init__(self, fromuid, content, insertdate):
+		self.fromuid = fromuid
+		self.content = content
+		self.insertdate = insertdate

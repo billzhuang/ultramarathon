@@ -512,20 +512,20 @@ class DataLayer(object):
 
 		return msgs
 
-	def ask_question(self, fromuid, touid, content):
+	def create_question(self, fromuid, touid, content):
 		self.reinitdb()
 		c = self.db.cursor()
 		c.execute(
 		'''
 		insert into bong.msg
 		(parent_id, fromuid, touid, content)
-		values(-1, %s, %s)
+		values(-1, %s, %s, %s)
 		''', (fromuid, touid, content))
 
 		c.close()
 		self.db.close()
 
-	def reply_question(self, pid, fromuid, touid, content):
+	def reply_question(self, q_id, fromuid, touid, content):
 		self.reinitdb()
 		c = self.db.cursor()
 		c.execute(
@@ -537,7 +537,7 @@ class DataLayer(object):
 		insert into bong.msg
 		(parent_id, fromuid, touid, content)
 		values(%s, %s, %s, %s)
-		''', (pid, pid, pid, fromuid, touid, content))
+		''', (q_id, q_id, q_id, fromuid, touid, content))
 
 		c.close()
 		self.db.close()
@@ -558,7 +558,9 @@ class DataLayer(object):
 
 		for row in rows:
 			if self.confirm_question(uid, row[0]):
-				return
+				return row[0]
+
+		return None
 
 	def confirm_question(self, uid, q_id):
 		self.reinitdb()
@@ -578,3 +580,43 @@ class DataLayer(object):
 			return False
 
 		return True
+
+	def load_question(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.id from bong.msg m
+		where m.touid=%s and isread=0
+		limit 1
+		''', (uid,))
+
+		row = c.fetchone()
+		c.close()
+		self.db.close()
+
+		if row is not None:
+			return row[0]
+
+		return None
+
+	def load_questionfeed(self, q_id):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.fromuid, m.content, m.insertdate from bong.msg m
+		where m.id = '453'
+		order by m.id desc
+		''', (q_id,))
+
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		list = []
+
+		for row in rows:
+			list.append(_entity.Answer(row[0], row[1], row[2]))
+
+		return list

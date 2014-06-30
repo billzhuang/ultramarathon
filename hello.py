@@ -287,6 +287,51 @@ def hello(uid=None, en=None):
         _data.DataLayer().create_like(session['uid'], uid, en)
     return redirect(url_for('dream'))
 
+@app.route("/ask")
+def ask():
+    return render_template('ask.html', uid=session['uid'])
+
+@app.route('/add_question', methods=['POST'])
+def add_question():
+    if not session.get('uid'):
+        abort(401)
+
+    _data.DataLayer().create_question(request.form['uid'], '-1', request.form['content'])
+
+    return redirect(url_for('mystory'))
+
+@app.route("/load_question")
+def load_question():
+    q_id = _data.DataLayer().load_question(session['uid'])
+    if q_id is None:
+        q_id = _data.DataLayer().pick_question(session['uid'])
+        if q_id is None:
+            return "没有新求助或回信"
+
+    answerlist = _data.DataLayer().load_questionfeed(q_id)
+    touid = ''
+    for answer in answerlist:
+        answer.name = u'我'
+        if answer.fromuid != session['uid']:
+            answer.name = 'TA'
+            touid = answer.fromuid
+        answer.content = unicode(answer.content, 'utf-8')
+    if touid == '':
+        abort(502)
+    return render_template('answer.html'
+                            , q_id = q_id
+                            , touid = touid
+                            , answerlist = answerlist)
+
+@app.route('/reply_question', methods=['POST'])
+def reply_question():
+    if not session.get('uid'):
+        abort(401)
+
+    _data.DataLayer().reply_question(request.form['q_id'], session['uid'], request.form['touid'], request.form['content'])
+
+    return redirect(url_for('load_question'))
+
 @app.route("/dayrun/<page>")
 def show_dayrun(page=0):
     todo = _data.DataLayer().batch_uids(int(page))
