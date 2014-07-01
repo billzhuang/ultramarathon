@@ -529,7 +529,8 @@ def dm_detail(q_id=None):
             touid = answer.fromuid
         answer.content = unicode(answer.content, 'utf-8')
     if touid == '':
-        abort(502)
+        # send to himself
+        touid = answer.fromuid
     return render_template('_dmcontext.html'
                             , q_id = q_id
                             , touid = touid
