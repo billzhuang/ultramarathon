@@ -40,15 +40,17 @@
 	  {% for msg in msgs %}
       {{ msg.name }} 在 {{msg.insertdate}} 说：{{msg.content}}</br>
 	  {% endfor %}
-	</p>
+
 	  <form action="{{ url_for('add_msg') }}" method="post"  class="input-group">
 	    <dl>
-	      <dt>对TA说点啥:
+	      <dt>对TA说点啥:</dt>
 	      <input type='text' size='40' maxlength='50' id='content' name='content' placeholder="你怎么不理我呀？" />
 	      <input type='hidden' id='uid' name='uid' value="{{ uid }}" />
 	      <input type='hidden' id='team_id' name='team_id' value="{{ team_id }}" />
-   	      <button type="submit" class="btn btn-primary btn-outlined">发布</button>
+   	      <button type="submit" class="btn btn-primary btn-block btn-outlined">发布</button>
 	    </dl>
 	  </form>
+	  </br>
+	</p>
 </div>
 {% endblock %}
