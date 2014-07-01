@@ -469,6 +469,55 @@ def send_dm():
 
     return redirect(url_for('feed'))
 
+@app.route('/dream2')
+def dream2():
+    _data.DataLayer().create_visit('trydream', session['uid'])
+    lastdreamtime = _data.DataLayer().check_dream(session['uid'])
+    canAccess = False
+
+    if lastdreamtime is None:
+        canAccess = True
+    else:
+        cTime = datetime.now().replace(minute=0, second=0, microsecond=0)
+        lTime = datetime.strptime(lastdreamtime, '%Y-%m-%d %H:%M:%S').replace(minute=0, second=0, microsecond=0)
+
+        if cTime - lTime >= timedelta(minutes=30):
+            canAccess = True
+            if 'times' not in session:
+                session['times'] = 1
+            else:
+                session['times'] = int(session['times']) + 1
+
+            if int(session['times'] >= 6):
+                session['times'] = 0
+                _data.DataLayer().create_visit('dream', session['uid'])
+                return redirect(url_for('mystory'))
+        else:
+            return render_template('restrict.html')
+
+    if canAccess:
+        userInfo = _data.DataLayer().user_info(session['uid'])
+        dream_uid = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
+
+        if dream_uid is None:
+            return render_template('empty.html')
+        try:
+            otherInfo = _data.DataLayer().user_info(dream_uid)
+            otherInfo.name = unicode(otherInfo.name, 'utf-8')
+            otherToken = _data.DataLayer().user_token(otherInfo.uid)
+            otherToken = _tryRefreshToken(otherToken)
+            otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
+        except BongAPIError:
+            '''no avatar'''
+
+    return render_template('_dream.html', otherInfo=otherInfo)
+
+@app.route("/zan/<uid>/<en>")
+def zan(uid=None, en=None):
+    if uid is not None:
+        _data.DataLayer().create_like(session['uid'], uid, en)
+    return redirect(url_for('dream2'))
+
 app.secret_key = _keys.secret_key
 
 if app.debug is not True:   

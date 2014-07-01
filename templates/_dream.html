@@ -1,0 +1,33 @@
+{% extends "_layoutNoFooter.html" %}
+{% block body %}
+<header class="bar bar-nav">
+  <a class="icon icon-left-nav pull-left" href="{{ url_for('feed') }}"></a>
+  <h1 class="title">{{ otherInfo.name }}</h1>
+</header>
+<div class="content">
+<p class="content-padded">
+  <img src="data:image/png;base64,{{ otherInfo.avatar|safe }}" alt="竟然没有头像" />
+</p>
+{% if userInfo.gender == '2' %}
+妹子
+{% else %}
+汉子
+{% endif %}
+
+<a href="/zan/{{ otherInfo.uid }}/1">好喜欢啊</a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="/zan/{{ otherInfo.uid }}/0">呵呵</a>
+
+<p class="content-padded">
+    <form action="{{ url_for('send_dm') }}" method="post"  class="input-group">
+      <dl>
+        <dt>对TA说点啥:</dt>
+        <input type='text' size='40' maxlength='100' id='content' name='content' placeholder="你好，你朋友掉地上了。" />
+        <input type='hidden' id='touid' name='touid' value="{{ otherInfo.uid }}" />
+          <button type="submit" class="btn btn-primary btn-block">发送</button>
+      </dl>
+    </form>
+    </br>
+  </p>
+</div>
+{% endblock %}
