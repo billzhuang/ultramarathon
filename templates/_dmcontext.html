@@ -1,0 +1,24 @@
+{% extends "_layoutNoFooter.html" %}
+{% block body %}
+<header class="bar bar-nav">
+  <a class="icon icon-left-nav pull-left" href="{{ url_for('list_message') }}"></a>
+  <h1 class="title">悄悄话</h1>
+</header>
+<div class="content">
+<p class="content-padded">
+  {% for answer in answerlist %}
+    {{ answer.name }} 在 {{answer.insertdate}} 说：{{answer.content}}</br>
+  {% endfor %}
+</p>
+<p class="content-padded">
+    <form action="{{ url_for('reply_dm') }}" method="post" class="input-group">
+    <dl>
+      <input type='text' size='40' maxlength='100' id='content' name='content'  placeholder="你好，你又有朋友掉地上了。" />
+      <input type='hidden' id='touid' name='touid' value="{{ touid }}" />
+      <input type='hidden' id='q_id' name='q_id' value="{{ q_id }}" />
+      <input type="submit" class="btn btn-primary btn-block" value='发送'>
+    </dl>
+    </form>
+  </p>
+</div>
+{% endblock %}

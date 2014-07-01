@@ -518,6 +518,32 @@ def zan(uid=None, en=None):
         _data.DataLayer().create_like(session['uid'], uid, en)
     return redirect(url_for('dream2'))
 
+@app.route("/dm_detail/<q_id>")
+def dm_detail(q_id=None):
+    answerlist = _data.DataLayer().load_questionfeed(q_id)
+    touid = ''
+    for answer in answerlist:
+        answer.name = u'我'
+        if answer.fromuid != session['uid']:
+            answer.name = 'TA'
+            touid = answer.fromuid
+        answer.content = unicode(answer.content, 'utf-8')
+    if touid == '':
+        abort(502)
+    return render_template('_dmcontext.html'
+                            , q_id = q_id
+                            , touid = touid
+                            , answerlist = answerlist)
+
+@app.route('/reply', methods=['POST'])
+def reply_dm():
+    if not session.get('uid'):
+        abort(401)
+
+    _data.DataLayer().reply_question(request.form['q_id'], session['uid'], request.form['touid'], request.form['content'])
+
+    return redirect(url_for('list_message'))
+
 app.secret_key = _keys.secret_key
 
 if app.debug is not True:   
