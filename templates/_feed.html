@@ -6,9 +6,6 @@
 </header>
 
 <div class="content">
-      <p class="content-padded">
-      	<a style="color:#F07818" href="{{ url_for('dream') }}">我的梦境</a>
-      </p>
 	  {% if showsummary %}
 	  <p class="content-padded">开始于{{teamsummary.startdate}}，两个人平均每天跑了{{teamsummary.avgdistance}}米,
 	  总共跑了{{teamsummary.sumdistance}}米，还需要<strong>{{teamsummary.leftday}}</strong>天。</p>

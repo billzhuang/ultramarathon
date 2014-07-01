@@ -493,14 +493,14 @@ def dream2():
                 _data.DataLayer().create_visit('dream', session['uid'])
                 return redirect(url_for('mystory'))
         else:
-            return render_template('restrict.html')
+            return render_template('_dreamfull.html')
 
     if canAccess:
         userInfo = _data.DataLayer().user_info(session['uid'])
         dream_uid = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
 
         if dream_uid is None:
-            return render_template('empty.html')
+            return render_template('_dreamfull.html')
         try:
             otherInfo = _data.DataLayer().user_info(dream_uid)
             otherInfo.name = unicode(otherInfo.name, 'utf-8')
