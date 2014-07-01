@@ -433,7 +433,7 @@ def feed():
         msg.name = unicode(msg.name, 'utf-8')
         msg.content = unicode(msg.content, 'utf-8')
 
-    return render_template('_feed.html'
+    return render_template('feed.html'
         , team=team,canfinish=canfinish
         , showsummary=showsummary
         , teamsummary=teamsummary
