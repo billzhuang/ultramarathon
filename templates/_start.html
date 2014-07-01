@@ -1,0 +1,12 @@
+{% extends "_layoutNoFooter.html" %}
+{% block body %}
+<header class="bar bar-nav">
+  <h1 class="title">{{user.name}}，欢迎你</h1>
+</header>
+<div class="content">
+<p class="content-padded">
+  想告别一个人孤单跑步的日子么？</br>
+  <a href="{{ url_for('matchpartner') }}">废话</a>
+</p>
+</div>
+{% endblock %}

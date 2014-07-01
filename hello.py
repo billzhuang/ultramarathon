@@ -122,7 +122,7 @@ def start():
     user.name = unicode(user.name, 'utf-8')
     token = _data.DataLayer().user_token(session['uid'])
     user.avatar = bong.user_avatar(uid=token.uid, access_token=token.access_token)
-    return render_template('start.html', user=user)
+    return render_template('_start.html', user=user)
 
 @app.route('/matchpartner')
 def matchpartner():
@@ -134,7 +134,7 @@ def matchpartner():
     uid = _data.DataLayer().try_match_user(user)
 
     if uid is None:
-        return render_template('nomatch.html')
+        return render_template('_nomatch.html')
 
     return redirect(url_for('feed'))
 

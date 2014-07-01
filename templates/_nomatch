@@ -1,0 +1,12 @@
+{% extends "_layoutNoFooter.html" %}
+{% block body %}
+<header class="bar bar-nav">
+  <a class="icon icon-left-nav pull-left" href="{{ url_for('dream2') }}"></a>
+  <h1 class="title">没有人符合我的气质</h1>
+</header>
+<div class="content">
+<p class="content-padded">
+  我待会再来看看，就<strong>一定</strong>会有惊喜。
+</p>
+</div>
+{% endblock %}
