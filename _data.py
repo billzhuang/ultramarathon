@@ -690,6 +690,6 @@ class DataLayer(object):
 			else:
 				question_id = row[3]
 
-			dmlist.append(_entity.DirectMessage(row[0], row[1]), question_id)
+			dmlist.append(_entity.DirectMessage(row[0], row[1], question_id))
 
 		return dmlist
