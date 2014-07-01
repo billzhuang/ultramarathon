@@ -15,7 +15,7 @@
 	  {% endif %}
     <ul class="table-view">
       <li class="table-view-cell media">
-        <a class="navigate-right" href="/info/{{ entry.uid }}">
+        <a class="navigate-right" href="/profile/{{ entry.uid }}">
           <img class="media-object pull-left" src="data:image/png;base64,{{ entry.avatar|safe }}" height="50" width="50" >
           <div class="media-body">
 	        {{ entry.name }}
@@ -34,9 +34,9 @@
 	  <a class="btn btn-primary btn-outlined" href="{{ url_for('finish') }}">完成</a>
     {% else %}
 	  <a class="btn btn-primary btn-outlined" href="{{ url_for('change') }}">换一个人吧</a>
-	{% endif %}</br>
+	{% endif %}</br></br>
 	{% for entry in fans %}
-    <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
+    <a href="/profile/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
 	{% endfor %}觉得我挺赞的!</br>
 	小提示：上传真人头像可以获得更多的赞。</br>
 	<p class="content-padded">

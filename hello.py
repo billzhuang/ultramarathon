@@ -445,6 +445,21 @@ def feed():
         , answer_no = answer_no
         , uid = session['uid'])
 
+@app.route("/profile/<uid>")
+def profile(uid=None):
+    if uid is not None:
+        _data.DataLayer().create_visit('info', session['uid'])
+        userInfo = _data.DataLayer().user_info(uid)
+        userInfo.name = unicode(userInfo.name, 'utf-8')
+        token = _data.DataLayer().user_token(uid)
+        try:
+            img = bong.user_avatar(uid=uid, access_token=token.access_token)
+            userInfo.avatar = img
+        except BongAPIError:
+            '''no avatar'''
+
+        return render_template('info.html', userInfo=userInfo)
+
 app.secret_key = _keys.secret_key
 
 if app.debug is not True:   
