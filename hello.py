@@ -66,7 +66,7 @@ def index():
         if user.isactive == 0L:
             return redirect(url_for('start'))        
 
-        return redirect(url_for('mystory'))
+        return redirect(url_for('feed'))
     except BongAPIError:
         oauth_return_url = url_for('oauth_return', _external=True)
         auth_url = bong.build_oauth_url(oauth_return_url)
@@ -136,7 +136,7 @@ def matchpartner():
     if uid is None:
         return render_template('nomatch.html')
 
-    return redirect(url_for('mystory'))
+    return redirect(url_for('feed'))
 
 @app.route('/deactive')
 def deactive():
@@ -222,7 +222,7 @@ def change():
     if partnerinfo is not None:
         _data.DataLayer().reject(partnerinfo.team_id, session['uid'])
 
-    return redirect(url_for('mystory'))
+    return redirect(url_for('feed'))
 
 @app.route("/info/<uid>")
 def show_info(uid=None):
@@ -246,7 +246,7 @@ def add_msg():
 
     _data.DataLayer().create_msg(request.form['team_id'], request.form['uid'], request.form['content'])
 
-    return redirect(url_for('mystory'))
+    return redirect(url_for('feed'))
 
 @app.route('/dream')
 def dream():
@@ -380,6 +380,7 @@ def show_dayrun(page=0):
 
 @app.route("/list_message")
 def list_message():
+    _data.DataLayer().create_visit('dm', session['uid'])
     msgList = _data.DataLayer().new_reply(session['uid'])
     for item in msgList:
         item.sender = unicode(item.sender, 'utf-8')
@@ -393,7 +394,7 @@ def feed():
         auth_url = bong.build_oauth_url(oauth_return_url)
         return redirect(auth_url)
 
-    _data.DataLayer().create_visit('mystory', session['uid'])
+    _data.DataLayer().create_visit('feed', session['uid'])
     partnerinfo = _data.DataLayer().partner_info(session['uid'])
     if partnerinfo is None:
         return redirect(url_for('matchpartner'))
@@ -448,7 +449,7 @@ def feed():
 @app.route("/profile/<uid>")
 def profile(uid=None):
     if uid is not None:
-        _data.DataLayer().create_visit('info', session['uid'])
+        _data.DataLayer().create_visit('profile', session['uid'])
         userInfo = _data.DataLayer().user_info(uid)
         userInfo.name = unicode(userInfo.name, 'utf-8')
         token = _data.DataLayer().user_token(uid)
@@ -471,7 +472,7 @@ def send_dm():
 
 @app.route('/dream2')
 def dream2():
-    _data.DataLayer().create_visit('trydream', session['uid'])
+    _data.DataLayer().create_visit('trydream2', session['uid'])
     lastdreamtime = _data.DataLayer().check_dream(session['uid'])
     canAccess = False
 
