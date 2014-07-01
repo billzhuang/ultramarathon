@@ -1,0 +1,53 @@
+{% extends "layout2.html" %}
+{% block body %}
+
+<header class="bar bar-nav">
+  <h1 class="title">{{ team.name }}</h1>
+</header>
+
+<div class="content">
+	  {% if showsummary %}
+	  <p class="content-padded">开始于{{teamsummary.startdate}}，两个人平均每天跑了{{teamsummary.avgdistance}}米,
+	  总共跑了{{teamsummary.sumdistance}}米，还需要<strong>{{teamsummary.leftday}}</strong>天。</p>
+	  {% endif %}
+    <ul class="table-view">
+      <li class="table-view-cell media">
+        <a class="navigate-right" href="/info/{{ entry.uid }}">
+          <img class="media-object pull-left" src="data:image/png;base64,{{ entry.avatar|safe }}">
+          <div class="media-body">
+	        {{ entry.name }}
+	        <p>
+	        {% if entry.gender == '2' %}
+		    妹子
+		    {% else %}
+		    汉子
+		    {% endif %}
+	        </p>
+	      </div>
+        </a>
+      </li>
+    </ul>
+    {% if canfinish %}
+   	  <button class="btn btn-primary btn-outlined" href="{{ url_for('finish') }}">完成</button>
+    {% else %}
+      <button class="btn btn-primary btn-outlined" href="{{ url_for('change') }}">换一个人吧</button>
+	  <a href="{{ url_for('change') }}">换一个人吧</a>
+	{% endif %}
+	{% for entry in fans %}
+    <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
+	{% endfor %}觉得我挺赞的!</br>
+	小提示：上传真人头像可以获得更多的赞。</br>
+	  {% for msg in msgs %}
+      {{ msg.name }} 在 {{msg.insertdate}} 说：{{msg.content}}</br>
+	  {% endfor %}
+	  <form action="{{ url_for('add_msg') }}" method="post"  class="input-group">
+	    <dl>
+	      <dt>对TA说点啥:
+	      <input type='text' size='40' maxlength='50' id='content' name='content' placeholder="你怎么不理我呀？" />
+	      <input type='hidden' id='uid' name='uid' value="{{ uid }}" />
+	      <input type='hidden' id='team_id' name='team_id' value="{{ team_id }}" />
+	      <input type="submit" class="btn btn-positive btn-block" value='发布'>
+	    </dl>
+	  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layout2.html" %}
+{% block body %}
+<header class="bar bar-nav">
+  <a class="icon icon-compose pull-right"></a>
+  <h1 class="title">悄悄话</h1>
+</header>
+<div class="content">
+<ul class="table-view">
+  {% for entry in entries %}
+  <li class="table-view-cell">
+    <a class="navigate-right">
+      <span class="badge">1</span>
+      来自<strong>{{ entry.sender }}</strong>的悄悄话
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+</div>
+{% endblock %}
