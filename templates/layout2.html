@@ -12,11 +12,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
     <!-- Include the compiled Ratchet CSS -->
-    <link href="url_for('static', filename='ratchet.min.css')" rel="stylesheet">
-    <link href="url_for('static', filename='ratchet-theme-ios.min.css')" rel="stylesheet">
+    <link href="{{url_for('static', filename='ratchet.min.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='ratchet-theme-ios.min.css')}}" rel="stylesheet">
 
     <!-- Include the compiled Ratchet JS -->
-    <script src="url_for('static', filename='ratchet.min.js')"></script>
+    <script src="{{url_for('static', filename='ratchet.min.js')}}"></script>
   </head>
   <body>
   {% block body %}{% endblock %}
