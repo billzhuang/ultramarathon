@@ -13,7 +13,7 @@
     <ul class="table-view">
       <li class="table-view-cell media">
         <a class="navigate-right" href="/info/{{ entry.uid }}">
-          <img class="media-object pull-left" src="data:image/png;base64,{{ entry.avatar|safe }}">
+          <img class="media-object pull-left" src="data:image/png;base64,{{ entry.avatar|safe }}" height="50" width="50" >
           <div class="media-body">
 	        {{ entry.name }}
 	        <p>
@@ -27,11 +27,10 @@
         </a>
       </li>
     </ul>
-    {% if canfinish %}
-   	  <button class="btn btn-primary btn-outlined" href="{{ url_for('finish') }}">完成</button>
+    {% if canfinish %}      
+	  <a class="btn btn-primary btn-outlined" href="{{ url_for('finish') }}">完成</a>
     {% else %}
-      <button class="btn btn-primary btn-outlined" href="{{ url_for('change') }}">换一个人吧</button>
-	  <a href="{{ url_for('change') }}">换一个人吧</a>
+	  <a class="btn btn-primary btn-outlined" href="{{ url_for('change') }}">换一个人吧</a>
 	{% endif %}
 	{% for entry in fans %}
     <a href="/info/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
@@ -47,6 +46,7 @@
 	      <input type='hidden' id='uid' name='uid' value="{{ uid }}" />
 	      <input type='hidden' id='team_id' name='team_id' value="{{ team_id }}" />
 	      <input type="submit" class="btn btn-positive btn-block" value='发布'>
+   	      <button type="submit" class="btn btn-primary btn-outlined" href="{{ url_for('finish') }}">发布</button>
 	    </dl>
 	  </form>
 </div>
