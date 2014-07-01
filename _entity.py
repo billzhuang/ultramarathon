@@ -53,3 +53,9 @@ class Answer(object):
 		self.fromuid = fromuid
 		self.content = content
 		self.insertdate = insertdate
+
+class DirectMessage(object):
+	def __init__(self, sender, sender_uid, question_id):
+		self.sender = sender
+		self.sender_uid = sender_uid
+		self.question_id = question_id

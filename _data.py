@@ -665,3 +665,29 @@ class DataLayer(object):
 		self.db.close()
 
 		return rowcount
+
+	def new_reply(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select mem.name,m.fromuid, m.id, m.parent_id from bong.msg m
+		join bong.member mem
+			on m.fromuid = mem.uid
+		where m.touid=%s and isread=0
+		limit 10
+		''', (uid,))
+
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		dmlist = []
+		for row in rows:
+			question_id = 0L
+			if row[3] == -1L:
+				question_id = row[2]
+			else:
+				question_id = row[3]
+
+			dmlist.append(_entity.DirectMessage(row[0], row[1]), question_id)

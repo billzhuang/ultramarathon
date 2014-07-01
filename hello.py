@@ -378,6 +378,73 @@ def show_dayrun(page=0):
             response += '%s cannot refresh data' % uid
     return response
 
+@app.route("/list_message")
+def list_message():
+    msgList = _data.DataLayer().new_reply(session['uid'])
+    for item in msgList:
+        item.sender = unicode(item.sender, 'utf-8')
+
+    return render_template('_msg.html', entries=msgList)
+
+@app.route('/feed')
+def feed():
+    if 'uid' not in session:
+        oauth_return_url = url_for('oauth_return', _external=True)
+        auth_url = bong.build_oauth_url(oauth_return_url)
+        return redirect(auth_url)
+
+    _data.DataLayer().create_visit('mystory', session['uid'])
+    partnerinfo = _data.DataLayer().partner_info(session['uid'])
+    if partnerinfo is None:
+        return redirect(url_for('matchpartner'))
+
+    teamsummary = _data.DataLayer().team_summary(partnerinfo.team_id)
+    showsummary = False
+    canfinish = False
+    if not teamsummary is None:
+        showsummary = True
+        canfinish = (100000 <= teamsummary.sumdistance)
+        if teamsummary.avgdistance != Decimal('0.00'):
+            teamsummary.leftday = int((100000 - teamsummary.sumdistance) / teamsummary.avgdistance)
+        else:
+            teamsummary.leftday = 100
+    try:
+        otherInfo = _data.DataLayer().user_info(partnerinfo.friend_uid)
+        otherInfo.name = unicode(otherInfo.name, 'utf-8')
+        otherToken = _data.DataLayer().user_token(otherInfo.uid)
+        otherToken = _tryRefreshToken(otherToken)
+        otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
+    except BongAPIError:
+        '''no avatar'''
+    myinfo = _data.DataLayer().user_info(session['uid'])
+    myinfo.name = unicode(myinfo.name, 'utf-8')
+
+    team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
+
+    question_no = _data.DataLayer().question_no(session['uid'])
+    answer_no = _data.DataLayer().answer_no(session['uid'])
+
+    fans = _data.DataLayer().my_fans(session['uid'])
+    for item in fans:
+        item.name = unicode(item.name, 'utf-8')
+
+    msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
+    for msg in msgs:
+        msg.name = unicode(msg.name, 'utf-8')
+        msg.content = unicode(msg.content, 'utf-8')
+
+    return render_template('_feed.html'
+        , team=team,canfinish=canfinish
+        , showsummary=showsummary
+        , teamsummary=teamsummary
+        , entries=(otherInfo,)
+        , msgs = msgs
+        , team_id=partnerinfo.team_id
+        , fans = fans
+        , question_no = question_no
+        , answer_no = answer_no
+        , uid = session['uid'])
+
 app.secret_key = _keys.secret_key
 
 if app.debug is not True:   
