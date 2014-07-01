@@ -384,7 +384,7 @@ def list_message():
     for item in msgList:
         item.sender = unicode(item.sender, 'utf-8')
 
-    return render_template('_msg.html', entries=msgList)
+    return render_template('message.html', entries=msgList)
 
 @app.route('/feed')
 def feed():
