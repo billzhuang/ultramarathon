@@ -458,7 +458,7 @@ def profile(uid=None):
         except BongAPIError:
             '''no avatar'''
 
-        return render_template('info.html', userInfo=userInfo)
+        return render_template('_profile.html', userInfo=userInfo)
 
 app.secret_key = _keys.secret_key
 
