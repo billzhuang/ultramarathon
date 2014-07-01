@@ -691,3 +691,5 @@ class DataLayer(object):
 				question_id = row[3]
 
 			dmlist.append(_entity.DirectMessage(row[0], row[1]), question_id)
+
+		return dmlist
