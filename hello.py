@@ -460,6 +460,15 @@ def profile(uid=None):
 
         return render_template('_profile.html', userInfo=userInfo)
 
+@app.route('/send_dm', methods=['GET','POST'])
+def send_dm():
+    if not session.get('uid'):
+        abort(401)
+
+    _data.DataLayer().create_question(session['uid'], request.form['touid'], request.form['content'])
+
+    return redirect(url_for('feed'))
+
 app.secret_key = _keys.secret_key
 
 if app.debug is not True:   
