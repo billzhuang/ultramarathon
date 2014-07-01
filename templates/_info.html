@@ -1,0 +1,17 @@
+{% extends "_layoutNoFooter.html" %}
+{% block body %}
+<header class="bar bar-nav">
+  <a class="icon icon-left-nav pull-left" href="feed"></a>
+  <h1 class="title">{{ userInfo.name }}</h1>
+</header>
+<div class="content">
+<p class="content-padded">
+  <img src="data:image/png;base64,{{ userInfo.avatar|safe }}" alt="竟然没有头像" />
+</p>
+{% if userInfo.gender == '2' %}
+妹子
+{% else %}
+汉子
+{% endif %}
+</div>
+{% endblock %}
