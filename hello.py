@@ -437,7 +437,7 @@ def feed():
         , team=team,canfinish=canfinish
         , showsummary=showsummary
         , teamsummary=teamsummary
-        , entries=(otherInfo,)
+        , entry=otherInfo
         , msgs = msgs
         , team_id=partnerinfo.team_id
         , fans = fans
