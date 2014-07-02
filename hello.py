@@ -151,65 +151,6 @@ def deactive():
 
     return u"谢谢你的使用，想完成一次超级马拉松随时再来。"
 
-@app.route('/mystory')
-def mystory():
-    if 'uid' not in session:
-        oauth_return_url = url_for('oauth_return', _external=True)
-        auth_url = bong.build_oauth_url(oauth_return_url)
-        return redirect(auth_url)
-
-    _data.DataLayer().create_visit('mystory', session['uid'])
-    partnerinfo = _data.DataLayer().partner_info(session['uid'])
-    if partnerinfo is None:
-        return redirect(url_for('matchpartner'))
-
-    teamsummary = _data.DataLayer().team_summary(partnerinfo.team_id)
-    showsummary = False
-    canfinish = False
-    if not teamsummary is None:
-        showsummary = True
-        canfinish = (100000 <= teamsummary.sumdistance)
-        if teamsummary.avgdistance != Decimal('0.00'):
-            teamsummary.leftday = int((100000 - teamsummary.sumdistance) / teamsummary.avgdistance)
-        else:
-            teamsummary.leftday = 100
-    try:
-        otherInfo = _data.DataLayer().user_info(partnerinfo.friend_uid)
-        otherInfo.name = unicode(otherInfo.name, 'utf-8')
-        otherToken = _data.DataLayer().user_token(otherInfo.uid)
-        otherToken = _tryRefreshToken(otherToken)
-        otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
-    except BongAPIError:
-        '''no avatar'''
-    myinfo = _data.DataLayer().user_info(session['uid'])
-    myinfo.name = unicode(myinfo.name, 'utf-8')
-
-    team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
-
-    question_no = _data.DataLayer().question_no(session['uid'])
-    answer_no = _data.DataLayer().answer_no(session['uid'])
-
-    fans = _data.DataLayer().my_fans(session['uid'])
-    for item in fans:
-        item.name = unicode(item.name, 'utf-8')
-
-    msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
-    for msg in msgs:
-        msg.name = unicode(msg.name, 'utf-8')
-        msg.content = unicode(msg.content, 'utf-8')
-
-    return render_template('mystory.html'
-        , team=team,canfinish=canfinish
-        , showsummary=showsummary
-        , teamsummary=teamsummary
-        , entries=(otherInfo,)
-        , msgs = msgs
-        , team_id=partnerinfo.team_id
-        , fans = fans
-        , question_no = question_no
-        , answer_no = answer_no
-        , uid = session['uid'])
-
 @app.route("/finish")
 def finish():
     partnerinfo = _data.DataLayer().partner_info(session['uid'])
@@ -224,21 +165,6 @@ def change():
 
     return redirect(url_for('feed'))
 
-@app.route("/info/<uid>")
-def show_info(uid=None):
-    if uid is not None:
-        _data.DataLayer().create_visit('info', session['uid'])
-        userInfo = _data.DataLayer().user_info(uid)
-        userInfo.name = unicode(userInfo.name, 'utf-8')
-        token = _data.DataLayer().user_token(uid)
-        try:
-            img = bong.user_avatar(uid=uid, access_token=token.access_token)
-            userInfo.avatar = img
-        except BongAPIError:
-            '''no avatar'''
-
-        return render_template('info.html', userInfo=userInfo)
-
 @app.route('/add_msg', methods=['GET','POST'])
 def add_msg():
     if not session.get('uid'):
@@ -247,55 +173,6 @@ def add_msg():
     _data.DataLayer().create_msg(request.form['team_id'], request.form['uid'], request.form['content'])
 
     return redirect(url_for('feed'))
-
-@app.route('/dream')
-def dream():
-    _data.DataLayer().create_visit('trydream', session['uid'])
-    lastdreamtime = _data.DataLayer().check_dream(session['uid'])
-    canAccess = False
-
-    if lastdreamtime is None:
-        canAccess = True
-    else:
-        cTime = datetime.now().replace(minute=0, second=0, microsecond=0)
-        lTime = datetime.strptime(lastdreamtime, '%Y-%m-%d %H:%M:%S').replace(minute=0, second=0, microsecond=0)
-
-        if cTime - lTime >= timedelta(minutes=30):
-            canAccess = True
-            if 'times' not in session:
-                session['times'] = 1
-            else:
-                session['times'] = int(session['times']) + 1
-
-            if int(session['times'] >= 6):
-                session['times'] = 0
-                _data.DataLayer().create_visit('dream', session['uid'])
-                return redirect(url_for('mystory'))
-        else:
-            return render_template('restrict.html')
-
-    if canAccess:
-        userInfo = _data.DataLayer().user_info(session['uid'])
-        dream_uid = _data.DataLayer().load_dream(userInfo.uid, userInfo.gender)
-
-        if dream_uid is None:
-            return render_template('empty.html')
-        try:
-            otherInfo = _data.DataLayer().user_info(dream_uid)
-            otherInfo.name = unicode(otherInfo.name, 'utf-8')
-            otherToken = _data.DataLayer().user_token(otherInfo.uid)
-            otherToken = _tryRefreshToken(otherToken)
-            otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
-        except BongAPIError:
-            '''no avatar'''
-
-    return render_template('dream.html', otherInfo=otherInfo)
-
-@app.route("/like/<uid>/<en>")
-def hello(uid=None, en=None):
-    if uid is not None:
-        _data.DataLayer().create_like(session['uid'], uid, en)
-    return redirect(url_for('dream'))
 
 @app.route("/ask")
 def ask():
@@ -422,28 +299,17 @@ def feed():
 
     team = _entity.TeamInfo(u'%s和%s的超级马拉松' % (otherInfo.name, myinfo.name))
 
-    question_no = _data.DataLayer().question_no(session['uid'])
-    answer_no = _data.DataLayer().answer_no(session['uid'])
-
     fans = _data.DataLayer().my_fans(session['uid'])
     for item in fans:
         item.name = unicode(item.name, 'utf-8')
-
-    msgs = _data.DataLayer().load_msg(partnerinfo.team_id)
-    for msg in msgs:
-        msg.name = unicode(msg.name, 'utf-8')
-        msg.content = unicode(msg.content, 'utf-8')
 
     return render_template('_feed.html'
         , team=team,canfinish=canfinish
         , showsummary=showsummary
         , teamsummary=teamsummary
         , entry=otherInfo
-        , msgs = msgs
         , team_id=partnerinfo.team_id
         , fans = fans
-        , question_no = question_no
-        , answer_no = answer_no
         , uid = session['uid'])
 
 @app.route("/profile/<uid>")
@@ -492,7 +358,7 @@ def dream2():
             if int(session['times'] >= 6):
                 session['times'] = 0
                 _data.DataLayer().create_visit('dream', session['uid'])
-                return redirect(url_for('mystory'))
+                return redirect(url_for('feed'))
         else:
             return render_template('_dreamfull.html')
 
