@@ -436,11 +436,11 @@ def list_idols():
 def report():
     _data.DataLayer().create_visit('report', session['uid'])
     base = datetime.today()
-    date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 30)]
+    date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 15)]
     date_list = date_list[::-1]
 
     #line_chart = pygal.Line()
-    line_chart = pygal.Line(style=LightColorizedStyle)
+    line_chart = pygal.Bar(style=LightColorizedStyle)
     line_chart.title = u'两个人的跑步数据'
     line_chart.x_labels = date_list
     
