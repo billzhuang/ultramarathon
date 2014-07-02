@@ -699,7 +699,7 @@ class DataLayer(object):
 		c = self.db.cursor()
 		c.execute(
 		'''
-		select m.name, m.uid from bong.member m
+		select m.name, m.uid, m.gender from bong.member m
 		where m.uid in 
 		(
 		select distinct(v.touid) from bong.vote v
@@ -716,6 +716,6 @@ class DataLayer(object):
 		idols = []
 
 		for row in rows:
-			idols.append(_entity.Idol(row[0], row[1]))
+			idols.append(_entity.Idol(row[0], row[1], row[2]))
 
 		return idols
