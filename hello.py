@@ -433,16 +433,17 @@ def list_idols():
 
 @app.route("/report")
 def report():
-    base = datetime.datetime.today()
-    date_list = [(base - datetime.timedelta(days=x))..strftime('%m%d') for x in range(0, 30)]
+    base = datetime.today()
+    date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 30)]
     dataDicta = _data.DataLayer().my_data(session['uid'])
     lista = []
     for date in date_list:
         if dataDicta.has_key(date):
-            lista.append(dataDicta[date])
+            lista.append(float(dataDicta[date]))
         else:
             lista.append(0)
-
+    print(date_list)
+    print(lista)
 
     line_chart = pygal.Line()
     line_chart.title = u'两个人的跑步数据'

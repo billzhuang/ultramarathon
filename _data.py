@@ -729,7 +729,7 @@ class DataLayer(object):
 		select dueday, distance from activity
 		where uid = '77985753343930907800'
 		order by dueday
-		''', uid)
+		''')
 
 		rows = c.fetchall()
 		c.close()
