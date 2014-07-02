@@ -1,7 +1,12 @@
 {% extends "_layoutNoFooter.html" %}
 {% block body %}
 <header class="bar bar-nav">
-  <a class="icon icon-left-nav pull-left" href="{{ url_for('feed') }}"></a>
+  <a href="{{ url_for('feed') }}">
+    <button class="btn btn-link btn-nav pull-left">
+    <span class="icon icon-left-nav"></span>
+    返回
+  </button>
+  </a>
   <h1 class="title">{{ userInfo.name }}</h1>
 </header>
 <div class="content">
