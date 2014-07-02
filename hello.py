@@ -433,16 +433,21 @@ def list_idols():
 
 @app.route("/report")
 def report():
-    '''base = datetime.datetime.today()
+    base = datetime.datetime.today()
     date_list = [(base - datetime.timedelta(days=x))..strftime('%m%d') for x in range(0, 30)]
-    dataDict = _data.DataLayer().my_data(session['uid'])'''
+    dataDicta = _data.DataLayer().my_data(session['uid'])
+    lista = []
+    for date in date_list:
+        if dataDicta.has_key(date):
+            lista.append(dataDicta[date])
+        else:
+            lista.append(0)
 
 
     line_chart = pygal.Line()
-    line_chart.title = u'跑步数据'
-    line_chart.x_labels = map(str, range(2002, 2013))
-    line_chart.add('Firefox', [None, None, 0, 16.6,   25,   31, 36.4, 45.5, 46.3, 42.8, 37.1])
-    line_chart.add('Chrome',  [None, None, None, None, None, None,    0,  3.9, 10.8, 23.8, 35.3])
+    line_chart.title = u'两个人的跑步数据'
+    line_chart.x_labels = date_list
+    line_chart.add(u'我', lista)
     svgdata = unicode(line_chart.render(), 'utf-8')
 
     return render_template('_report.html', svgdata=svgdata)
