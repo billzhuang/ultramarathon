@@ -430,6 +430,11 @@ def list_idols():
 
     return render_template('_idols.html', entries=idols)
 
+@app.route("/report")
+def report():
+    
+    return render_template('_report.html')
+
 app.secret_key = _keys.secret_key
 
 if app.debug is not True:   
