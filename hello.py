@@ -412,6 +412,15 @@ def reply_dm():
 
     return redirect(url_for('list_message'))
 
+@app.route("/list_idols")
+def list_idols():
+    _data.DataLayer().create_visit('list_idols', session['uid'])
+    idols = _data.DataLayer().my_idols(session['uid'])
+    for item in idols:
+        item.name = unicode(item.name, 'utf-8')
+
+    return render_template('_idols.html', entries=idols)
+
 app.secret_key = _keys.secret_key
 
 if app.debug is not True:   

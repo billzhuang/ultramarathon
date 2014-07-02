@@ -59,3 +59,8 @@ class DirectMessage(object):
 		self.sender = sender
 		self.sender_uid = sender_uid
 		self.question_id = question_id
+
+class Idol(object):
+	def __init__(self, name, uid):
+		self.name = name
+		self.uid = uid

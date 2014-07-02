@@ -693,3 +693,29 @@ class DataLayer(object):
 			dmlist.append(_entity.DirectMessage(row[0], row[1], question_id))
 
 		return dmlist
+
+	def my_idols(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		select m.name, m.uid from bong.member m
+		where m.uid in 
+		(
+		select distinct(v.touid) from bong.vote v
+		where v.fromuid=%s and v.up=1
+		)
+		order by rand()
+		limit 5
+		''', uid)
+
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		idols = []
+
+		for row in rows:
+			idols.append(_entity.Idol(row[0], row[1]))
+
+		return idols

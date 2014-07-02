@@ -1,0 +1,25 @@
+{% extends "_layout.html" %}
+{% block body %}
+<header class="bar bar-nav">
+  <h1 class="title">谁是最可爱的人</h1>
+</header>
+<div class="content">
+<ul class="table-view">
+  {% for entry in entries %}
+  <li class="table-view-cell">
+    <a class="navigate-right" href="/profile/{{ entry.uid }}">
+        {{ entry.name }}  
+        <p>      
+        {% if entry.gender == '2' %}
+        妹子
+        {% else %}
+        汉子
+        {% endif %}
+        </p>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+<p class="content-padded">随机显示五个你成点过赞的TA</p>
+</div>
+{% endblock %}
