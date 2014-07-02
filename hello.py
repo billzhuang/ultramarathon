@@ -436,7 +436,7 @@ def list_idols():
 def report():
     _data.DataLayer().create_visit('report', session['uid'])
     base = datetime.today()
-    date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 15)]
+    date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 7)]
     date_list = date_list[::-1]
 
     #line_chart = pygal.Line()

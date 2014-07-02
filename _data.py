@@ -728,7 +728,7 @@ class DataLayer(object):
 		
 		select dueday, distance from activity
 		where uid = %s
-		and TIMESTAMPDIFF(day, dueday ,now()) <  31
+		and TIMESTAMPDIFF(day, dueday ,now()) <  8
 		order by dueday
 		''', uid)
 
