@@ -320,6 +320,8 @@ def profile(uid=None):
         token = _data.DataLayer().user_token(uid)
         try:
             img = bong.user_avatar(uid=uid, access_token=token.access_token)
+            if img == '':
+                img = _keys.default_avatar
             userInfo.avatar = img
         except BongAPIError:
             userInfo.avatar = _keys.default_avatar
