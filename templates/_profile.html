@@ -11,13 +11,16 @@
 </header>
 <div class="content">
 <p class="content-padded">
-  <img src="data:image/png;base64,{{ userInfo.avatar|safe }}" alt="竟然没有头像" />
+  <div style="text-align:center;">
+  <img src="data:image/png;base64,{{ userInfo.avatar|safe }}" alt="竟然没有头像" /></br>
+  {% if userInfo.gender == '2' %}
+  妹子
+  {% else %}
+  汉子
+  {% endif %}
+  </div>
 </p>
-{% if userInfo.gender == '2' %}
-妹子
-{% else %}
-汉子
-{% endif %}
+
 <p class="content-padded">
     <form action="{{ url_for('send_dm') }}" method="post" name="dmform" id="dmform" class="input-group">
         对TA说点啥:</br>
