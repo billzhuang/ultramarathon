@@ -443,7 +443,7 @@ def report():
     line_chart.x_labels = map(str, range(2002, 2013))
     line_chart.add('Firefox', [None, None, 0, 16.6,   25,   31, 36.4, 45.5, 46.3, 42.8, 37.1])
     line_chart.add('Chrome',  [None, None, None, None, None, None,    0,  3.9, 10.8, 23.8, 35.3])
-    svgdata = line_chart.render()
+    svgdata = unicode(line_chart.render(), 'utf-8')
 
     return render_template('_report.html', svgdata=svgdata)
 
