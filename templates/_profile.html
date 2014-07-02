@@ -7,7 +7,7 @@
     返回
   </button>
   </a>
-  <a href="">
+  <a href="javascript:void(0)" onclick="onSubmit();">
   <button class="btn pull-right">
     提交
   </button>
@@ -24,10 +24,12 @@
 汉子
 {% endif %}
 <script type="text/javascript">
-if(document.getElementById("content").value != ''){
-  document.dmform.submit();  
+function onSubmit(){
+  if(document.getElementById("content").value != ''){
+    document.dmform.submit();  
+  }
+  return false;
 }
-return false;
 </script>
 
 <p class="content-padded">
