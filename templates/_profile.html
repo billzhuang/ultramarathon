@@ -7,6 +7,11 @@
     返回
   </button>
   </a>
+  <a href="">
+  <button class="btn pull-right">
+    提交
+  </button>
+  </a>
   <h1 class="title">{{ userInfo.name }}</h1>
 </header>
 <div class="content">
@@ -18,8 +23,14 @@
 {% else %}
 汉子
 {% endif %}
+<script type="text/javascript">
+if(document.getElementById("content").value ！= ''){
+  document.dmform.submit();  
+}
+</script>
+
 <p class="content-padded">
-    <form action="{{ url_for('send_dm') }}" method="post"  class="input-group">
+    <form action="{{ url_for('send_dm') }}" method="post" name="dmform" id="dmform" class="input-group">
       <dl>
         <dt>对TA说点啥:</dt>
         <input type='text' size='40' maxlength='100' id='content' name='content' placeholder="你好，你朋友掉地上了。" />
