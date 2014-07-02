@@ -9,6 +9,7 @@ import _keys
 import _data
 import _entity
 import pygal
+from pygal.style import LightColorizedStyle
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -437,7 +438,8 @@ def report():
     date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 30)]
     date_list = date_list[::-1]
 
-    line_chart = pygal.Line()
+    #line_chart = pygal.Line()
+    line_chart = pygal.StackedLine(fill=True, interpolate='cubic', style=LightColorizedStyle)
     line_chart.title = u'两个人的跑步数据'
     line_chart.x_labels = date_list
     
