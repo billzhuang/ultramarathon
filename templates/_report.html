@@ -34,8 +34,13 @@ var data = {
         }
     ]
 };
-var ctx = document.getElementById("myChart1").getContext("2d");
-var myNewChart = new Chart(ctx).Line(data);
+window.onload=function(){
+    setTimeout(function() {
+        var ctx = document.getElementById("myChart1").getContext("2d");
+		var myNewChart = new Chart(ctx).Line(data);
+    }, 2000);
+};
+
 </script>
 </div>
 {% endblock %}
