@@ -289,7 +289,10 @@ def feed():
         otherInfo.name = unicode(otherInfo.name, 'utf-8')
         otherToken = _data.DataLayer().user_token(otherInfo.uid)
         otherToken = _tryRefreshToken(otherToken)
-        otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
+        img = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
+        if img == '' or img is None:
+            img = _keys.default_avatar
+        otherInfo.avatar = img
     except BongAPIError:
         otherInfo.avatar = _keys.default_avatar
         '''no avatar'''
@@ -320,7 +323,7 @@ def profile(uid=None):
         token = _data.DataLayer().user_token(uid)
         try:
             img = bong.user_avatar(uid=uid, access_token=token.access_token)
-            if img == '':
+            if img == '' or img is None:
                 img = _keys.default_avatar
             userInfo.avatar = img
         except BongAPIError:
@@ -375,7 +378,10 @@ def dream2():
             otherInfo.name = unicode(otherInfo.name, 'utf-8')
             otherToken = _data.DataLayer().user_token(otherInfo.uid)
             otherToken = _tryRefreshToken(otherToken)
-            otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
+            img = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
+            if img == '' or img is None:
+                img = _keys.default_avatar
+            otherInfo.avatar = img
         except BongAPIError:
             otherInfo.avatar = _keys.default_avatar
             '''no avatar'''
