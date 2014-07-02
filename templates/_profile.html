@@ -25,9 +25,12 @@
 {% endif %}
 <script type="text/javascript">
 function onSubmit(){
+  alert(document.getElementById("content").value);
   if(document.getElementById("content").value != ''){
+    alert(1);
     document.dmform.submit();  
   }else{
+    alert(2);
     return false;
   }
 }
