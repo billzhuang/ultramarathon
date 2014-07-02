@@ -8,6 +8,7 @@ from decimal import Decimal
 import _keys
 import _data
 import _entity
+import pygal
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -432,8 +433,19 @@ def list_idols():
 
 @app.route("/report")
 def report():
-    
-    return render_template('_report.html')
+    '''base = datetime.datetime.today()
+    date_list = [(base - datetime.timedelta(days=x))..strftime('%m%d') for x in range(0, 30)]
+    dataDict = _data.DataLayer().my_data(session['uid'])'''
+
+
+    line_chart = pygal.Line()
+    line_chart.title = u'跑步数据'
+    line_chart.x_labels = map(str, range(2002, 2013))
+    line_chart.add('Firefox', [None, None, 0, 16.6,   25,   31, 36.4, 45.5, 46.3, 42.8, 37.1])
+    line_chart.add('Chrome',  [None, None, None, None, None, None,    0,  3.9, 10.8, 23.8, 35.3])
+    svgdata = line_chart.render()
+
+    return render_template('_report.html', svgdata=svgdata)
 
 app.secret_key = _keys.secret_key
 

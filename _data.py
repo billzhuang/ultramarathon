@@ -719,3 +719,25 @@ class DataLayer(object):
 			idols.append(_entity.Idol(row[0], row[1], row[2]))
 
 		return idols
+
+	def my_data(self, uid):
+		self.reinitdb()
+		c = self.db.cursor()
+		c.execute(
+		'''
+		
+		select dueday, distance from activity
+		where uid = '77985753343930907800'
+		order by dueday
+		''', uid)
+
+		rows = c.fetchall()
+		c.close()
+		self.db.close()
+
+		dataDict = {}
+
+		for row in rows:
+			dataDict[row[0].strftime('%m%d')] = row[1]
+
+		return dataDict
