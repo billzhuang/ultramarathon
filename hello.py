@@ -433,8 +433,13 @@ def list_idols():
 
 @app.route("/report")
 def report():
+    line_chart = pygal.Line()
+    line_chart.title = u'两个人的跑步数据'
+    line_chart.x_labels = date_list
+
     base = datetime.today()
     date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 30)]
+    date_list = date_list[::-1]
     dataDicta = _data.DataLayer().my_data(session['uid'])
     lista = []
     for date in date_list:
@@ -442,13 +447,19 @@ def report():
             lista.append(float(dataDicta[date]))
         else:
             lista.append(0)
-    print(date_list)
-    print(lista)
-
-    line_chart = pygal.Line()
-    line_chart.title = u'两个人的跑步数据'
-    line_chart.x_labels = date_list
     line_chart.add(u'我', lista)
+    
+    partnerinfo = _data.DataLayer().partner_info(session['uid'])
+    if partnerinfo is not None:
+        dataDictb = _data.DataLayer().my_data(partnerinfo.friend_uid)
+        listb = []
+        for date in date_list:
+            if dataDictb.has_key(date):
+                listb.append(float(dataDictb[date]))
+            else:
+                listb.append(0)
+        line_chart.add('TA', listb)
+    
     svgdata = unicode(line_chart.render(), 'utf-8')
 
     return render_template('_report.html', svgdata=svgdata)
