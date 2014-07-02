@@ -27,6 +27,7 @@
 if(document.getElementById("content").value ！= ''){
   document.dmform.submit();  
 }
+return false;
 </script>
 
 <p class="content-padded">
@@ -35,7 +36,6 @@ if(document.getElementById("content").value ！= ''){
         <dt>对TA说点啥:</dt>
         <input type='text' size='40' maxlength='100' id='content' name='content' placeholder="你好，你朋友掉地上了。" />
         <input type='hidden' id='touid' name='touid' value="{{ userInfo.uid }}" />
-          <button type="submit" class="btn btn-primary btn-block">发送</button>
       </dl>
     </form>
     </br>
