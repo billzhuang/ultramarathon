@@ -434,6 +434,7 @@ def list_idols():
 
 @app.route("/report")
 def report():
+    _data.DataLayer().create_visit('report', session['uid'])
     base = datetime.today()
     date_list = [(base - timedelta(days=x)).strftime('%m%d') for x in range(0, 30)]
     date_list = date_list[::-1]
