@@ -6,14 +6,14 @@
 </header>
 <div class="content">
 <p class="content-padded">
-  <img src="data:image/png;base64,{{ otherInfo.avatar|safe }}" alt="竟然没有头像" />
+  <div style="text-align:center;">
+  <img src="data:image/png;base64,{{ otherInfo.avatar|safe }}" alt="竟然没有头像" /></br>
+  {% if otherInfo.gender == '2' %}
+  妹子
+  {% else %}
+  汉子
+  {% endif %}
 </p>
-{% if otherInfo.gender == '2' %}
-妹子
-{% else %}
-汉子
-{% endif %}
-
 <a href="/zan/{{ otherInfo.uid }}/1">好喜欢啊</a>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="/zan/{{ otherInfo.uid }}/0">呵呵</a>
