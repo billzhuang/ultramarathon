@@ -120,8 +120,6 @@ def logout():
 def start():
     user = _data.DataLayer().user_info(session['uid'])
     user.name = unicode(user.name, 'utf-8')
-    token = _data.DataLayer().user_token(session['uid'])
-    user.avatar = bong.user_avatar(uid=token.uid, access_token=token.access_token)
     return render_template('_start.html', user=user)
 
 @app.route('/matchpartner')
@@ -293,6 +291,7 @@ def feed():
         otherToken = _tryRefreshToken(otherToken)
         otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
     except BongAPIError:
+        otherInfo.avatar = _keys.default_avatar
         '''no avatar'''
     myinfo = _data.DataLayer().user_info(session['uid'])
     myinfo.name = unicode(myinfo.name, 'utf-8')
@@ -323,6 +322,7 @@ def profile(uid=None):
             img = bong.user_avatar(uid=uid, access_token=token.access_token)
             userInfo.avatar = img
         except BongAPIError:
+            userInfo.avatar = _keys.default_avatar
             '''no avatar'''
 
         return render_template('_profile.html', userInfo=userInfo)
@@ -375,6 +375,7 @@ def dream2():
             otherToken = _tryRefreshToken(otherToken)
             otherInfo.avatar = bong.user_avatar(uid=otherInfo.uid, access_token=otherToken.access_token)
         except BongAPIError:
+            otherInfo.avatar = _keys.default_avatar
             '''no avatar'''
 
     return render_template('_dream.html', otherInfo=otherInfo)
