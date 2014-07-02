@@ -439,7 +439,7 @@ def report():
     date_list = date_list[::-1]
 
     #line_chart = pygal.Line()
-    line_chart = pygal.StackedLine(fill=True, interpolate='cubic', style=LightColorizedStyle)
+    line_chart = pygal.Line(style=LightColorizedStyle)
     line_chart.title = u'两个人的跑步数据'
     line_chart.x_labels = date_list
     
