@@ -32,9 +32,11 @@
     {% else %}
 	  <a class="btn btn-primary btn-outlined" href="{{ url_for('change') }}">换一个人吧</a>
 	{% endif %}</br></br>
+	<p class="content-padded">
 	{% for entry in fans %}
-    <a href="/profile/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;&nbsp;
+    <a href="/profile/{{ entry.uid }}">{{ entry.name }}</a>,&nbsp;
 	{% endfor %}觉得我挺赞的!</br>
-	小提示：上传真人头像可以获得更多的赞。</br>
+	小提示：上传真人头像可以获得更多的赞。
+	</p>
 </div>
 {% endblock %}
