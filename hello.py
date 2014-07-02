@@ -444,7 +444,7 @@ def report():
     lista = []
     for date in date_list:
         if dataDicta.has_key(date):
-            lista.append(float(dataDicta[date]))
+            lista.append(dataDicta[date])
         else:
             lista.append(0)
     line_chart.add(u'我', lista)
@@ -455,7 +455,7 @@ def report():
         listb = []
         for date in date_list:
             if dataDictb.has_key(date):
-                listb.append(float(dataDictb[date]))
+                listb.append(dataDictb[date])
             else:
                 listb.append(0)
         line_chart.add('TA', listb)

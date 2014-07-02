@@ -739,6 +739,6 @@ class DataLayer(object):
 		dataDict = {}
 
 		for row in rows:
-			dataDict[row[0].strftime('%m%d')] = row[1]
+			dataDict[row[0].strftime('%m%d')] = float(row[1])
 
 		return dataDict
