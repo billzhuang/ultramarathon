@@ -1,7 +1,12 @@
 {% extends "_layoutNoFooter.html" %}
 {% block body %}
 <header class="bar bar-nav">
-  <a class="icon icon-left-nav pull-left" href="{{ url_for('list_message') }}"></a>
+  <a href="{{ url_for('list_message') }}">
+    <button class="btn btn-link btn-nav pull-left">
+    <span class="icon icon-left-nav"></span>
+    返回
+  </button>
+  </a>
   <h1 class="title">悄悄话</h1>
 </header>
 <div class="content">
@@ -12,14 +17,12 @@
 </p>
 <p class="content-padded">
     <form action="{{ url_for('reply_dm') }}" method="post" class="input-group">
-    <dl>
-      <input type='text' size='40' maxlength='100' id='content' name='content'  placeholder="你好，你又有朋友掉地上了。" />
-      <input type='hidden' id='touid' name='touid' value="{{ touid }}" />
-      <input type='hidden' id='q_id' name='q_id' value="{{ q_id }}" />
-      <dt>
-      <button type="submit" class="btn btn-primary btn-block">发送</button>
-      </dt>
-    </dl>
+    <input type='text' size='40' maxlength='100' id='content' name='content'  placeholder="你好，你又有朋友掉地上了。" />
+    <input type='hidden' id='touid' name='touid' value="{{ touid }}" />
+    <input type='hidden' id='q_id' name='q_id' value="{{ q_id }}" />
+    <div style="text-align:center; margin-top:20px;">
+      <button type="submit" class="btn btn-primary btn-outlined">发送</button>
+    </div>
     </form>
   </p>
 </div>
