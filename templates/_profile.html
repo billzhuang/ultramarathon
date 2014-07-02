@@ -27,8 +27,9 @@
 function onSubmit(){
   if(document.getElementById("content").value != ''){
     document.dmform.submit();  
+  }else{
+    return false;
   }
-  return false;
 }
 </script>
 
