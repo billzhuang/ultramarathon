@@ -17,7 +17,7 @@
 </p>
 <p class="content-padded">
     <form action="{{ url_for('reply_dm') }}" method="post" class="input-group">
-    <input type='text' size='40' maxlength='100' id='content' name='content'  placeholder="你好，你又有朋友掉地上了。" />
+    <input type='text' size='40' maxlength='100' id='content' name='content'  placeholder="输入想和对方说的话" />
     <input type='hidden' id='touid' name='touid' value="{{ touid }}" />
     <input type='hidden' id='q_id' name='q_id' value="{{ q_id }}" />
     <div style="text-align:center; margin-top:20px;">

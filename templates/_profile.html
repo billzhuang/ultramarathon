@@ -24,7 +24,7 @@
 <p class="content-padded">
     <form action="{{ url_for('send_dm') }}" method="post" name="dmform" id="dmform" class="input-group">
         对TA说点啥:</br>
-        <input type='text' size='40' maxlength='100' id='content' name='content' placeholder="你好，你朋友掉地上了。" />
+        <input type='text' size='40' maxlength='100' id='content' name='content' placeholder="输入想和对方说的话" />
         <input type='hidden' id='touid' name='touid' value="{{ userInfo.uid }}" />
         <div style="text-align:center; margin-top:20px;">
           <button type="submit" class="btn btn-primary btn-outlined">发送</button>
