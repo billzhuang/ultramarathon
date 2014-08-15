@@ -372,8 +372,8 @@ class DataLayer(object):
 		for row in rows:
 			list.append(row[0])
 
-		start = page * 15
-		end = (page + 1) * 15
+		start = page * 50
+		end = (page + 1) * 50
 
 		return list[start:end]
 
