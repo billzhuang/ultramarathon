@@ -1,9 +1,0 @@
-<!doctype html>
-<title>一起跑吧</title>
-<div style="background:#FCEBB6;color:#78C0A8">新功能《造梦屋》，<a style="color:#F07818" href="{{ url_for('dream') }}">快点我</a></div>
-<div class=page>
-  {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
-  {% block body %}{% endblock %}
-</div>

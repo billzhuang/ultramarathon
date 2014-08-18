@@ -8,11 +8,13 @@ from decimal import Decimal
 import _keys
 import _data
 import _entity
-import pygal
-from pygal.style import LightColorizedStyle
+#import pygal
+#from pygal.style import LightColorizedStyle
+import sae
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app)
+#app.wsgi_app = ProxyFix(app.wsgi_app)
+app.debug = True
 
 bong = BongClient(_keys.client_id, _keys.client_secret)
 
@@ -174,53 +176,7 @@ def add_msg():
 
     return redirect(url_for('feed'))
 
-@app.route("/ask")
-def ask():
-    _data.DataLayer().create_visit('ask', session['uid'])
-    return render_template('ask.html'
-                    , uid=session['uid'])
 
-@app.route('/add_question', methods=['POST'])
-def add_question():
-    if not session.get('uid'):
-        abort(401)
-
-    _data.DataLayer().create_question(request.form['uid'], '-1', request.form['content'])
-
-    return render_template('askdone.html')
-
-@app.route("/load_question")
-def load_question():
-    _data.DataLayer().create_visit('answer', session['uid'])
-    q_id = _data.DataLayer().load_question(session['uid'])
-    if q_id is None:
-        q_id = _data.DataLayer().pick_question(session['uid'])
-        if q_id is None:
-            return render_template('nomsg.html')
-
-    answerlist = _data.DataLayer().load_questionfeed(q_id)
-    touid = ''
-    for answer in answerlist:
-        answer.name = u'我'
-        if answer.fromuid != session['uid']:
-            answer.name = 'TA'
-            touid = answer.fromuid
-        answer.content = unicode(answer.content, 'utf-8')
-    if touid == '':
-        abort(502)
-    return render_template('answer.html'
-                            , q_id = q_id
-                            , touid = touid
-                            , answerlist = answerlist)
-
-@app.route('/reply_question', methods=['POST'])
-def reply_question():
-    if not session.get('uid'):
-        abort(401)
-
-    _data.DataLayer().reply_question(request.form['q_id'], session['uid'], request.form['touid'], request.form['content'])
-
-    return render_template('afterreply.html')
 
 @app.route('/close_question', methods=['POST'])
 def close_question():
@@ -432,7 +388,7 @@ def list_idols():
 
     return render_template('_idols.html', entries=idols)
 
-@app.route("/report")
+'''@app.route("/report")
 def report():
     _data.DataLayer().create_visit('report', session['uid'])
     base = datetime.today()
@@ -466,10 +422,11 @@ def report():
     
     svgdata = unicode(line_chart.render(), 'utf-8')
 
-    return render_template('_report.html', svgdata=svgdata)
+    return render_template('_report.html', svgdata=svgdata)'''
 
 app.secret_key = _keys.secret_key
 
+'''
 if app.debug is not True:   
     import logging
     from logging.handlers import RotatingFileHandler
@@ -480,4 +437,4 @@ if app.debug is not True:
     app.logger.addHandler(file_handler)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0')'''
