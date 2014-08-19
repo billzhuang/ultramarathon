@@ -1,2 +1,8 @@
 name: ultramarathon
 version: 1
+
+cron:
+    - description: sync feed
+      url: dayrun/1
+      schedule: every 50 mins
+      timezone: Beijing

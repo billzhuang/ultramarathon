@@ -692,14 +692,19 @@ class DataLayer(object):
 		c = self.db.cursor()
 		c.execute(
 		'''
-		select m.name, m.uid, m.gender from member m
-		where m.uid in 
-		(
-		select distinct(v.touid) from vote v
-		where v.fromuid=%s and v.up=1
+		select m.name, m.uid, m.gender
+		from (
+		SELECT DISTINCT (
+		v.touid
 		)
-		order by rand()
-		limit 5
+		FROM vote v
+		WHERE v.fromuid = %s
+		AND v.up =1
+		ORDER BY RAND() 
+		LIMIT 5
+		) q
+		join member m
+		on q.touid = m.uid		
 		''', uid)
 
 		rows = c.fetchall()
